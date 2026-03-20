@@ -185,11 +185,16 @@
 ```
 .company/
 ├── CLAUDE.md
-└── secretary/
+├── secretary/
+│   ├── CLAUDE.md
+│   ├── inbox/
+│   ├── todos/
+│   └── notes/
+└── accounting/
     ├── CLAUDE.md
-    ├── inbox/
-    ├── todos/
-    └── notes/
+    ├── revenue.csv
+    ├── sync.md
+    └── reports/
 ```
 
 ## 部署一覧
@@ -197,6 +202,7 @@
 | 部署 | フォルダ | 役割 |
 |------|---------|------|
 | 秘書室 | secretary | 窓口・相談役。TODO管理、壁打ち、メモ。常設。 |
+| 経理部署 | accounting | 売上管理。Notion収益DBのミラー・分析・月次レポート。 |
 
 ---
 
