@@ -19,6 +19,55 @@
 - `sync.md` — 最終同期情報（日時・件数）
 - `reports/` — 月次レポートなど
 
+## トラブルシューティング（ntn CLI）
+
+エラーが出たらまずここを確認すること。
+
+### ❌ `ntn: command not found`
+
+**原因**: `ntn` は nvm 管理下のNode.jsにグローバルインストール済みだが、
+Claude CodeのBashツールが `.bashrc` のnvm初期化を読まないため、PATHが通っていない。
+
+```
+# インストール場所
+/home/konkai/.nvm/versions/node/v22.17.0/lib/node_modules/ntn/bin/ntn
+```
+
+**対処**: `ntn` の代わりに `npx ntn` を使う（nvmのPATHに依存しないため安定）。
+
+```bash
+# NG（nvmのPATHが必要）
+ntn api v1/...
+
+# OK（npxはnpmキャッシュから解決するため動く）
+npx ntn api v1/...
+```
+
+---
+
+### ❌ `API token is invalid`
+
+**原因候補と対処**:
+
+| 原因 | 確認方法 | 対処 |
+|------|---------|------|
+| ① `source ~/.bashrc` が古いトークンを読んでいる | `grep NOTION_API_TOKEN ~/.bashrc` で実際の値を確認 | トークンを直接指定して実行（下記） |
+| ② `.bashrc` への保存が完了していない | 同上 | Notion側で再確認・再保存してから `grep` で確認 |
+| ③ Notionインテグレーション側で無効化されている | Notion設定 → インテグレーション | トークンを再生成 |
+
+**`source ~/.bashrc` が信用できない場合の実行方法**:
+
+```bash
+# トークンをgrep→確認してから直接指定する
+grep NOTION_API_TOKEN ~/.bashrc
+NOTION_API_TOKEN="ここに貼り付け" npx ntn api v1/...
+```
+
+> 2026-03-23 実例: `source ~/.bashrc` では古いトークンが読まれ認証失敗。
+> `grep` で正しいトークンを確認し直接指定することで解決。
+
+---
+
 ## 同期ルール（リスク対策込み）
 
 ### 同期方法：全件洗い替え

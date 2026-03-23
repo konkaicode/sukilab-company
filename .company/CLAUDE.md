@@ -190,11 +190,28 @@
 │   ├── inbox/
 │   ├── todos/
 │   └── notes/
-└── accounting/
+├── accounting/
+│   ├── CLAUDE.md
+│   ├── revenue.csv
+│   ├── sync.md
+│   └── reports/
+├── job-hunting/
+│   ├── CLAUDE.md
+│   ├── strategy.md
+│   ├── companies/
+│   ├── es/
+│   └── interviews/
+└── research/
     ├── CLAUDE.md
-    ├── revenue.csv
-    ├── sync.md
-    └── reports/
+    ├── knowledge/
+    │   ├── ai.md
+    │   ├── shopify.md
+    │   ├── wordpress.md
+    │   ├── marketing.md
+    │   ├── job-hunting.md
+    │   └── general.md
+    └── sources/
+        └── log.md
 ```
 
 ## 部署一覧
@@ -203,6 +220,8 @@
 |------|---------|------|
 | 秘書室 | secretary | 窓口・相談役。TODO管理、壁打ち、メモ。常設。 |
 | 経理部署 | accounting | 売上管理。Notion収益DBのミラー・分析・月次レポート。 |
+| 就活部署 | job-hunting | 就職活動管理。企業研究・ES・面接メモ・選考トラッキング。 |
+| リサーチ部署 | research | 記事DB管理。Browser Use で読み込み・要約・星評価→知識ベースに蓄積。 |
 
 ---
 
