@@ -6,3 +6,4 @@
 |------|-----|---------|--------|------------|------|
 | 2026-03-23 | https://note.com/suh_sunaneko/n/n7b2108779bf6 | AI / Claude Code | ★3 | — | WebFetch本文不完全。全文確認後に再評価推奨 |
 | 2026-03-23 | https://qiita.com/miruky/items/48ede59ebe33b4b774ac | AI / Claude Code | ★5 | — | 20の実践テクニック網羅。必読 |
+| 2026-03-23 | https://zenn.dev/okikusan/articles/eacc59ca26e566 | AI / Claude Code / 株 | ★4 | — | Skills設計知見豊富。スキラボ拡張・投資分析の両面で活用可 |
