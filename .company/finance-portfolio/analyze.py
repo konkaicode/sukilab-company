@@ -53,6 +53,62 @@ US_WATCHLIST = {
 SCREEN_SIZE      = 100    # スクリーニング最大取得件数
 SCREEN_MIN_YIELD = 1.5    # スクリーニング最低配当利回り（%。絞り込みはvalue_scoreで行う）
 
+COVID_YEAR = 2020         # コロナ禍基準年（配当維持確認年）
+
+
+def calc_consecutive_non_cut(by_year: dict):
+    """連続非減配年数とコロナ禍サバイバルを計算する
+
+    Returns:
+        (streak, survived_covid)
+        - streak: 直近年から遡って連続して「前年以上の配当を維持した」年数
+        - survived_covid: 2020年に減配しなかったか（True/False/None=データなし）
+    """
+    if not by_year or len(by_year) < 2:
+        return (1 if by_year else 0), None
+
+    years = sorted(by_year.keys())
+
+    streak = 0
+    for i in range(len(years) - 1, 0, -1):
+        curr = years[i]
+        prev = years[i - 1]
+        if curr - prev > 1:
+            break  # 飛び年がある場合はストップ
+        if by_year[curr] >= by_year[prev] * 0.99:  # 1%の誤差許容（丸め対策）
+            streak += 1
+        else:
+            break
+
+    # コロナ禍サバイバル（2019→2020 減配なし）
+    if 2019 in by_year and 2020 in by_year:
+        survived_covid = by_year[2020] >= by_year[2019] * 0.99
+    else:
+        survived_covid = None  # データなし
+
+    return streak, survived_covid
+
+
+def calc_stability_score(streak, survived_covid):
+    """連続非減配スコア（50点満点）
+    連続非減配年数(0-30点) + コロナ禍サバイバルボーナス(0-20点)
+    """
+    if streak is None:
+        streak = 0
+
+    if streak >= 20:       streak_pts = 30
+    elif streak >= 15:     streak_pts = 26
+    elif streak >= 10:     streak_pts = 22
+    elif streak >= 7:      streak_pts = 16
+    elif streak >= 5:      streak_pts = 11
+    elif streak >= 3:      streak_pts = 6
+    elif streak >= 2:      streak_pts = 3
+    elif streak >= 1:      streak_pts = 1
+    else:                  streak_pts = 0
+
+    covid_pts = 20 if survived_covid is True else 0
+    return streak_pts + covid_pts
+
 
 def get_latest_csv():
     csvs = sorted(DATA_DIR.glob("*.csv"), key=lambda f: f.stat().st_mtime, reverse=True)
@@ -174,7 +230,7 @@ def get_usdjpy():
 def get_us_stock_info(ticker):
     """Yahoo FinanceからUS株の現在値・年間配当・増配率CAGRを取得"""
     url = (f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
-           f"?interval=1d&range=6y&events=dividends")
+           f"?interval=1d&range=10y&events=dividends")
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     try:
         with urllib.request.urlopen(req, timeout=10) as res:
@@ -197,16 +253,19 @@ def get_us_stock_info(ticker):
             if prev > 0 and by_year[current_year] < prev * 0.75:
                 del by_year[current_year]
 
+        # 連続非減配・コロナサバイバルは全履歴から計算（5年フィルタ前）
+        streak, survived_covid = calc_consecutive_non_cut(by_year)
+
         years = sorted(by_year)[-5:]
         if len(years) < 2:
-            return price, None, None, {}
+            return price, None, None, {}, streak, survived_covid
 
         first, last = by_year[years[0]], by_year[years[-1]]
         n = years[-1] - years[0]
         cagr = ((last / first) ** (1 / n) - 1) * 100 if n > 0 and first > 0 else 0
-        return price, round(cagr, 1), by_year[years[-1]], {y: by_year[y] for y in years}
+        return price, round(cagr, 1), by_year[years[-1]], {y: by_year[y] for y in years}, streak, survived_covid
     except Exception:
-        return None, None, None, {}
+        return None, None, None, {}, None, None
 
 
 def get_us_recommendations(usdjpy):
@@ -215,7 +274,7 @@ def get_us_recommendations(usdjpy):
     for sector, stocks_list in US_WATCHLIST.items():
         for ticker, name in stocks_list:
             print(f"  US候補取得: {ticker} {name}")
-            price_usd, cagr, annual_div_usd, history = get_us_stock_info(ticker)
+            price_usd, cagr, annual_div_usd, history, streak, survived_covid = get_us_stock_info(ticker)
             time.sleep(0.5)
             if price_usd is None or annual_div_usd is None or price_usd == 0:
                 continue
@@ -232,9 +291,26 @@ def get_us_recommendations(usdjpy):
             meets_yield  = net_yield_nisa >= DIV_YIELD_THRESHOLD
             meets_growth = cagr is not None and cagr >= DIV_GROWTH_THRESHOLD
 
-            yield_score  = net_yield_nisa / DIV_YIELD_THRESHOLD
-            growth_score = (cagr / DIV_GROWTH_THRESHOLD) if cagr is not None else 0
-            score = yield_score + growth_score
+            stability_score = calc_stability_score(streak, survived_covid)
+
+            # 利回りスコア（0-20点）
+            if net_yield_nisa >= 5.0:        yield_pts = 20
+            elif net_yield_nisa >= 4.0:      yield_pts = 16
+            elif net_yield_nisa >= 3.5:      yield_pts = 13
+            elif net_yield_nisa >= 3.0:      yield_pts = 9
+            elif net_yield_nisa >= 2.0:      yield_pts = 4
+            else:                            yield_pts = 0
+
+            # 増配率スコア（0-15点）
+            if cagr is None:                 growth_pts = 0
+            elif cagr >= 15:                 growth_pts = 15
+            elif cagr >= 10:                 growth_pts = 12
+            elif cagr >= 5:                  growth_pts = 8
+            elif cagr >= 0:                  growth_pts = 4
+            else:                            growth_pts = 0
+
+            # 総合スコア: 連続非減配 > 利回り > 増配率（3:2:1 重み）
+            composite_score = stability_score * 3 + yield_pts * 2 + growth_pts
 
             candidates.append({
                 "ticker": ticker, "name": name, "sector": sector,
@@ -244,11 +320,13 @@ def get_us_recommendations(usdjpy):
                 "net_yield_taxable": net_yield_taxable,
                 "annual_div_usd": annual_div_usd,
                 "cagr": cagr, "history": history,
+                "streak": streak, "survived_covid": survived_covid,
+                "stability_score": stability_score,
+                "composite_score": composite_score,
                 "meets_yield": meets_yield, "meets_growth": meets_growth,
-                "score": score,
             })
 
-    candidates.sort(key=lambda x: x["score"], reverse=True)
+    candidates.sort(key=lambda x: x["composite_score"], reverse=True)
     return candidates
 
 
@@ -332,30 +410,44 @@ def get_value_info(code):
         return None, None, None, None
 
 
+def get_payout_ratio(code):
+    """yfinanceから配当性向（%）を取得"""
+    ticker = f"{code}.T"
+    try:
+        info = yf.Ticker(ticker).info
+        ratio = info.get("payoutRatio")
+        if ratio is not None and 0 < ratio < 5:  # 500%超は異常値として除外
+            return round(ratio * 100, 1)
+        return None
+    except Exception:
+        return None
+
+
 def get_schd_dividend_growth():
     """SCHD（米国高配当ETF）の配当増配率をYahoo Finance APIから取得（USD建て）"""
-    url = "https://query1.finance.yahoo.com/v8/finance/chart/SCHD?interval=1d&range=6y&events=dividends"
+    url = "https://query1.finance.yahoo.com/v8/finance/chart/SCHD?interval=1d&range=10y&events=dividends"
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     try:
         with urllib.request.urlopen(req, timeout=10) as res:
             data = json.loads(res.read())
         dividends = data["chart"]["result"][0].get("events", {}).get("dividends", {})
         if not dividends:
-            return None, None, None, {}
+            return None, None, None, {}, None, None
         by_year = {}
         for ts, v in dividends.items():
             year = datetime.fromtimestamp(int(ts)).year
             by_year[year] = round(by_year.get(year, 0) + v["amount"], 4)
+        streak, survived_covid = calc_consecutive_non_cut(by_year)
         years = sorted(by_year)[-5:]
         if len(years) < 2:
-            return None, None, None, {}
+            return None, None, None, {}, streak, survived_covid
         first, last = by_year[years[0]], by_year[years[-1]]
         n = years[-1] - years[0]
         cagr = ((last / first) ** (1 / n) - 1) * 100 if n > 0 and first > 0 else 0
         hist = {y: by_year[y] for y in years}
-        return round(cagr, 1), hist, by_year[years[-1]], {}
+        return round(cagr, 1), hist, by_year[years[-1]], {}, streak, survived_covid
     except Exception:
-        return None, None, None, {}
+        return None, None, None, {}, None, None
 
 
 def get_dividend_growth(code):
@@ -364,33 +456,40 @@ def get_dividend_growth(code):
     try:
         divs = yf.Ticker(ticker).dividends
         if divs.empty:
-            return None, None, None, {}
+            return None, None, None, {}, None, None
 
-        # 年ごとに合算（日本株は通常年2回払い）
+        # 年ごとに合算（日本株の3月期決算対応：1-3月の配当は前年度に帰属）
+        # 3月末配当（期末）をカレンダー年で翌年に計上するズレを補正する
         by_year = {}
         for dt, amount in divs.items():
             year = dt.year
+            if dt.month <= 3:  # 1-3月払い（期末配当等）は前年度として集計
+                year -= 1
             by_year[year] = round(by_year.get(year, 0) + float(amount), 2)
 
         # 当年が前年比75%未満なら途中データとして除外
-        # （日本株の年2回配当で期末のみ計上されたケースをカバー）
-        current_year = datetime.now().year
-        if current_year in by_year:
-            prev = by_year.get(current_year - 1, 0)
-            if prev > 0 and by_year[current_year] < prev * 0.75:
-                del by_year[current_year]
+        # month<=3補正後は「現在構築中の不完全年度」が current_year-1 になる場合がある
+        now = datetime.now()
+        fiscal_current = now.year - 1 if now.month <= 3 else now.year
+        if fiscal_current in by_year:
+            prev = by_year.get(fiscal_current - 1, 0)
+            if prev > 0 and by_year[fiscal_current] < prev * 0.75:
+                del by_year[fiscal_current]
+
+        # 連続非減配・コロナサバイバルは全履歴から計算（5年フィルタ前）
+        streak, survived_covid = calc_consecutive_non_cut(by_year)
 
         years = sorted(by_year)[-5:]
         if len(years) < 2:
-            return None, None, None, {}
+            return None, None, None, {}, streak, survived_covid
 
         hist = {y: by_year[y] for y in years}
         first, last = by_year[years[0]], by_year[years[-1]]
         n = years[-1] - years[0]
         cagr = ((last / first) ** (1 / n) - 1) * 100 if n > 0 and first > 0 else 0
-        return round(cagr, 1), hist, by_year[years[-1]], {}
+        return round(cagr, 1), hist, by_year[years[-1]], {}, streak, survived_covid
     except Exception:
-        return None, None, None, {}
+        return None, None, None, {}, None, None
 
 
 def screen_jp_candidates(held_codes: set) -> list:
@@ -455,7 +554,7 @@ def get_recommendations(held_stocks, sector_val, jp_total):
         checked.add(code)
 
         print(f"  候補取得: {code} {name}")
-        cagr, history, latest, _ = get_dividend_growth(code)
+        cagr, history, latest, _, streak, survived_covid = get_dividend_growth(code)
         time.sleep(0.3)
         if latest is None:
             continue
@@ -490,6 +589,27 @@ def get_recommendations(held_stocks, sector_val, jp_total):
         div_yield = latest / price * 100
         value_score = calc_value_score(per, pbr, div_yield, roe_pct, growth_pct)
 
+        stability_score = calc_stability_score(streak, survived_covid)
+
+        # 利回りスコア（0-20点）
+        if div_yield >= 5.0:        yield_pts = 20
+        elif div_yield >= 4.0:      yield_pts = 16
+        elif div_yield >= 3.5:      yield_pts = 13
+        elif div_yield >= 3.0:      yield_pts = 9
+        elif div_yield >= 2.0:      yield_pts = 4
+        else:                       yield_pts = 0
+
+        # 増配率スコア（0-15点）
+        if cagr is None:            growth_pts = 0
+        elif cagr >= 15:            growth_pts = 15
+        elif cagr >= 10:            growth_pts = 12
+        elif cagr >= 5:             growth_pts = 8
+        elif cagr >= 0:             growth_pts = 4
+        else:                       growth_pts = 0
+
+        # 総合スコア: 連続非減配 > 利回り > 増配率（3:2:1 重み）
+        composite_score = stability_score * 3 + yield_pts * 2 + growth_pts
+
         candidates.append({
             "code": code, "name": name, "sector": sec,
             "status": status, "sector_ratio": ratio,
@@ -497,12 +617,15 @@ def get_recommendations(held_stocks, sector_val, jp_total):
             "cagr": cagr, "latest_div": latest,
             "per": per, "pbr": pbr, "roe": roe_pct, "growth": growth_pct,
             "value_score": value_score,
+            "streak": streak, "survived_covid": survived_covid,
+            "stability_score": stability_score,
+            "composite_score": composite_score,
             "meets_yield": div_yield >= DIV_YIELD_THRESHOLD,
             "meets_growth": cagr is not None and cagr >= DIV_GROWTH_THRESHOLD,
         })
 
-    # バリュースコア降順でソート
-    candidates.sort(key=lambda x: x["value_score"], reverse=True)
+    # 総合スコア降順でソート（連続非減配 > 利回り > 増配率）
+    candidates.sort(key=lambda x: x["composite_score"], reverse=True)
     return candidates
 
 
@@ -513,7 +636,7 @@ def _bar(ratio, width=24):
     return "█" * filled + "░" * (width - filled)
 
 
-def generate_portfolio_report(stocks, totals, dividend_data, sector_data, today, rec_filename=None):
+def generate_portfolio_report(stocks, totals, dividend_data, sector_data, today, payout_data=None, rec_filename=None):
     """ポートフォリオレポートを生成（保有状況・配当・セクター分析）"""
     lines = []
     lines.append(f"# ファイナンスポートフォリオ レポート {today}\n")
@@ -538,13 +661,14 @@ def generate_portfolio_report(stocks, totals, dividend_data, sector_data, today,
     lines.append("|--------|--------|------|------|----------|--------|------------|")
     for s in sorted(stocks, key=lambda x: x["gain_pct"] or 0, reverse=True):
         gp = f"{s['gain_pct']:+.2f}%" if s["gain_pct"] is not None else "--"
-        lines.append(f"| {s['code']} | {s['name']} | {s['section']} | {s['qty']} | {s['cost']:,.0f} | {s['current']:,.0f} | {gp} |")
+        code_link = f"[{s['code']}](https://finance.yahoo.co.jp/quote/{s['code']}.T)"
+        lines.append(f"| {code_link} | {s['name']} | {s['section']} | {s['qty']} | {s['cost']:,.0f} | {s['current']:,.0f} | {gp} |")
     lines.append("")
 
     # ── 配当収入・利回り ──────────────────────────────────
     lines.append("## 配当収入・利回り\n")
-    lines.append("| コード | 銘柄名 | 口座 | 保有株数 | 年間配当(円/株) | 年間配当収入(円) | 配当利回り |")
-    lines.append("|--------|--------|------|----------|----------------|-----------------|------------|")
+    lines.append("| コード | 銘柄名 | 口座 | 保有株数 | 年間配当(円/株) | 年間配当収入(円) | 配当利回り | 連続非減配 | COVID | 配当性向 |")
+    lines.append("|--------|--------|------|----------|----------------|-----------------|------------|-----------|-------|---------|")
 
     total_div_income = 0
     stock_val_with_div = 0
@@ -552,14 +676,22 @@ def generate_portfolio_report(stocks, totals, dividend_data, sector_data, today,
         if s["section"] == "投信":
             continue
         code = s["code"]
-        cagr, history, latest, forecast = dividend_data.get(code, (None, None, None, {}))
+        data = dividend_data.get(code, (None, None, None, {}, None, None))
+        cagr, history, latest = data[0], data[1], data[2]
+        streak = data[4] if len(data) > 4 else None
+        survived_covid = data[5] if len(data) > 5 else None
         if latest is None:
             continue
         annual_income = latest * s["qty"]
         div_yield = (latest / s["current"] * 100) if s["current"] > 0 else 0
         total_div_income += annual_income
         stock_val_with_div += s["total_val"]
-        lines.append(f"| {code} | {s['name']} | {s['section']} | {s['qty']} | {latest:.1f} | {annual_income:,.0f} | {div_yield:.2f}% |")
+        streak_str = f"{streak}期" if streak else "---"
+        covid_str  = "✅" if survived_covid is True else ("❌" if survived_covid is False else "❓")
+        pr = payout_data.get(code) if payout_data else None
+        pr_str = f"{pr:.1f}%" if pr is not None else "---"
+        code_link = f"[{code}](https://finance.yahoo.co.jp/quote/{code}.T)"
+        lines.append(f"| {code_link} | {s['name']} | {s['section']} | {s['qty']} | {latest:.1f} | {annual_income:,.0f} | {div_yield:.2f}% | {streak_str} | {covid_str} | {pr_str} |")
 
     lines.append("")
     total_div_yield = (total_div_income / stock_val_with_div * 100) if stock_val_with_div > 0 else 0
@@ -577,7 +709,7 @@ def generate_portfolio_report(stocks, totals, dividend_data, sector_data, today,
         for s in schd_list:
             gp = f"{s['gain_pct']:+.2f}%" if s["gain_pct"] is not None else "--"
             tg_val = f"{s['total_gain']:+,.0f}" if s["total_gain"] is not None else "--"
-            cagr, history, latest, _ = dividend_data.get("FUND", (None, None, None, {}))
+            cagr, history, latest, *_ = dividend_data.get("FUND", (None, None, None, {}, None, None))
             cagr_str = f"{cagr:+.1f}%" if cagr is not None else "---"
             hist_str = "  ".join([f"{y}:${v:.2f}" for y, v in history.items()]) if history else "---"
             lines.append(f"| {s['name']} | {s['total_val']:,.0f} | {tg_val} | {gp} | {cagr_str} | {hist_str} |")
@@ -602,15 +734,15 @@ def generate_portfolio_report(stocks, totals, dividend_data, sector_data, today,
 
     all_hist_years = sorted({
         y
-        for code, (cagr, history, latest, forecast) in dividend_data.items()
-        if history
-        for y in history
+        for code, data in dividend_data.items()
+        if data[1]
+        for y in data[1]
     })[-4:]
     all_fore_years = sorted({
         y
-        for code, (cagr, history, latest, forecast) in dividend_data.items()
-        if forecast
-        for y in forecast
+        for code, data in dividend_data.items()
+        if data[3]
+        for y in data[3]
     })
     all_years = sorted(set(all_hist_years) | set(all_fore_years))
 
@@ -630,7 +762,7 @@ def generate_portfolio_report(stocks, totals, dividend_data, sector_data, today,
         seen.add(code)
         if code not in dividend_data:
             continue
-        cagr, history, latest, forecast = dividend_data[code]
+        cagr, history, latest, forecast, *_ = dividend_data[code]
         if cagr is None:
             sign_str = "---"
             year_cols = "".join(" --- |" for _ in all_years)
@@ -798,7 +930,7 @@ def generate_portfolio_report(stocks, totals, dividend_data, sector_data, today,
         if code in seen_m:
             continue
         seen_m.add(code)
-        cagr, _, latest, _ = dividend_data.get(code, (None, None, None, {}))
+        cagr, _, latest, *__ = dividend_data.get(code, (None, None, None, {}, None, None))
         if latest is None:
             continue
         div_yield = (latest / s["current"] * 100) if s["current"] > 0 else 0
@@ -843,7 +975,7 @@ def generate_portfolio_report(stocks, totals, dividend_data, sector_data, today,
         if code in seen_c:
             continue
         seen_c.add(code)
-        cagr, _, _, _ = dividend_data.get(code, (None, None, None, {}))
+        cagr, *__ = dividend_data.get(code, (None, None, None, {}, None, None))
         reasons = []
         if cagr is not None and cagr < 0:
             reasons.append(f"減配傾向（{cagr:+.1f}%CAGR）")
@@ -929,7 +1061,10 @@ def generate_recommendation_report(recommendations, us_recommendations, usdjpy, 
     # ── 1. 購入候補提案 ──────────────────────────────────
     if recommendations:
         lines.append("## 1. 日本株購入候補提案\n")
-        lines.append(f"> 基準：利回り {DIV_YIELD_THRESHOLD}%以上 ／ 増配率 {DIV_GROWTH_THRESHOLD:.0f}%以上CAGR を優先。未保有・不足セクターを優先提案。\n")
+        lines.append(f"> **優先順位：連続非減配期数 > 利回り > 増配率** の順で重みづけした総合スコア順に表示。\n")
+        lines.append(f"> 基準：利回り {DIV_YIELD_THRESHOLD}%以上 ／ 増配率 {DIV_GROWTH_THRESHOLD:.0f}%以上CAGR。未保有・不足セクターを優先提案。\n")
+        lines.append(f"> 総合スコア = 安定性(0-50点)×3 ＋ 利回り(0-20点)×2 ＋ 増配率(0-15点)×1　最大205点\n")
+        lines.append(f"> COVID✅ = 2020年（コロナ禍）に減配なし（+20点ボーナス）\n")
 
         # 理想ゾーン（両方クリア）
         ideal = [r for r in recommendations if r["meets_yield"] and r["meets_growth"]]
@@ -941,15 +1076,22 @@ def generate_recommendation_report(recommendations, us_recommendations, usdjpy, 
             cagr_str   = f"{r['cagr']:+.1f}%" if r["cagr"] is not None else "---"
             per_str    = f"{r['per']:.1f}"     if r["per"]  is not None else "---"
             pbr_str    = f"{r['pbr']:.2f}"     if r["pbr"]  is not None else "---"
-            roe_str    = f"{r['roe']:.1f}%"    if r["roe"]  is not None else "---"
-            growth_str = f"{r['growth']:+.1f}%" if r["growth"] is not None else "---"
-            return (f"| {r['code']} | {r['name']} | {r['sector']} "
-                    f"| **{r['value_score']:.0f}点** "
+            streak     = r.get("streak")
+            streak_str = f"{streak}期" if streak is not None else "---"
+            covid      = r.get("survived_covid")
+            covid_str  = "✅" if covid is True else ("❌" if covid is False else "❓")
+            stab_str   = f"{r.get('stability_score', 0):.0f}点"
+            comp_str   = f"**{r.get('composite_score', 0):.0f}点**"
+            code_link = f"[{r['code']}](https://finance.yahoo.co.jp/quote/{r['code']}.T)"
+            return (f"| {code_link} | {r['name']} | {r['sector']} "
+                    f"| {comp_str} | {stab_str} | {streak_str} | {covid_str} "
                     f"| {r['price']:,.0f}円 | {r['div_yield']:.2f}% | {cagr_str} "
-                    f"| {per_str} | {pbr_str} | {roe_str} | {growth_str} |")
+                    f"| {per_str} | {pbr_str} |")
 
-        header = "| コード | 銘柄名 | セクター | スコア | 現在値 | 利回り | 増配率 | PER | PBR | ROE | 売上成長 |"
-        sep    = "|--------|--------|---------|--------|--------|--------|--------|-----|-----|-----|---------|"
+        header = ("| コード | 銘柄名 | セクター | 総合スコア | 安定性 | 連続非減配 | COVID | "
+                  "現在値 | 利回り | 増配率 | PER | PBR |")
+        sep    = ("|--------|--------|---------|-----------|--------|-----------|-------|"
+                  "--------|--------|--------|-----|-----|")
 
         if ideal:
             lines.append(f"### 🌟 最優先候補（利回り{DIV_YIELD_THRESHOLD}%＋ 増配率{DIV_GROWTH_THRESHOLD:.0f}%＋）\n")
@@ -1001,18 +1143,26 @@ def generate_recommendation_report(recommendations, us_recommendations, usdjpy, 
         us_others   = [r for r in us_recommendations if not r["meets_yield"] and not r["meets_growth"]]
 
         def fmt_us(r):
-            cagr_str = f"{r['cagr']:+.1f}%CAGR" if r["cagr"] is not None else "---"
+            cagr_str   = f"{r['cagr']:+.1f}%CAGR" if r["cagr"] is not None else "---"
+            streak     = r.get("streak")
+            streak_str = f"{streak}期" if streak is not None else "---"
+            covid      = r.get("survived_covid")
+            covid_str  = "✅" if covid is True else ("❌" if covid is False else "❓")
+            comp_str   = f"**{r.get('composite_score', 0):.0f}点**"
+            ticker_link = f"[{r['ticker']}](https://finance.yahoo.co.jp/quote/{r['ticker']})"
             return (
-                f"| {r['ticker']} | {r['name']} | {r['sector']} "
+                f"| {ticker_link} | {r['name']} | {r['sector']} "
+                f"| {comp_str} | {streak_str} | {covid_str} "
                 f"| ${r['price_usd']:,.2f}（約{r['price_jpy']:,.0f}円） "
                 f"| {r['gross_yield']:.2f}% "
                 f"| {r['net_yield_nisa']:.2f}% "
-                f"| {r['net_yield_taxable']:.2f}% "
                 f"| {cagr_str} |"
             )
 
-        us_header = "| Ticker | 銘柄名 | セクター | 現在値 | 表面利回り | 実質(NISA) | 実質(特定) | 増配率 |"
-        us_sep    = "|--------|--------|---------|--------|-----------|-----------|-----------|--------|"
+        us_header = ("| Ticker | 銘柄名 | セクター | 総合スコア | 連続非減配 | COVID | "
+                     "現在値 | 表面利回り | 実質(NISA) | 増配率 |")
+        us_sep    = ("|--------|--------|---------|-----------|-----------|-------|"
+                     "--------|-----------|-----------|--------|")
 
         if us_ideal:
             lines.append(f"### 🌟 最優先候補（実質利回り{DIV_YIELD_THRESHOLD}%＋ × 増配率{DIV_GROWTH_THRESHOLD:.0f}%＋）\n")
@@ -1072,12 +1222,31 @@ def main():
             continue
         done.add(code)
         if code == "FUND" and "高配当" in s["name"]:
-            cagr, history, latest, forecast = get_schd_dividend_growth()
+            result = get_schd_dividend_growth()
         else:
-            cagr, history, latest, forecast = get_dividend_growth(code)
-        dividend_data[code] = (cagr, history, latest, forecast)
+            result = get_dividend_growth(code)
+        dividend_data[code] = result
+        cagr = result[0]
+        streak = result[4] if len(result) > 4 else None
+        survived_covid = result[5] if len(result) > 5 else None
         status = f"{cagr:+.1f}%" if cagr is not None else "---"
-        print(f"  {code} {s['name']}: {status}")
+        streak_str = f" | 連続{streak}期" if streak else ""
+        covid_str = " | COVID✅" if survived_covid else (" | COVID❌" if survived_covid is False else "")
+        print(f"  {code} {s['name']}: {status}{streak_str}{covid_str}")
+        time.sleep(0.3)
+
+    print("配当性向データ取得中...")
+    payout_data = {}
+    done_p = set()
+    for s in stocks:
+        code = s["code"]
+        if code in done_p or s["section"] == "投信":
+            continue
+        done_p.add(code)
+        pr = get_payout_ratio(code)
+        payout_data[code] = pr
+        pr_str = f"{pr:.1f}%" if pr is not None else "---"
+        print(f"  {code} {s['name']}: {pr_str}")
         time.sleep(0.3)
 
     print("セクターデータ取得中...")
@@ -1108,7 +1277,7 @@ def main():
 
     # ── ポートフォリオレポート出力 ────────────────────────
     portfolio_report = generate_portfolio_report(
-        stocks, totals, dividend_data, sector_data, today, rec_filename=rec_filename
+        stocks, totals, dividend_data, sector_data, today, payout_data=payout_data, rec_filename=rec_filename
     )
     portfolio_path = REPORT_DIR / portfolio_filename
     portfolio_path.write_text(portfolio_report, encoding="utf-8")

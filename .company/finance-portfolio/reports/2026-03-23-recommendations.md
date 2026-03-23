@@ -4,122 +4,128 @@
 
 ## 1. 日本株購入候補提案
 
-> 基準：利回り 3.5%以上 ／ 増配率 10%以上CAGR を優先。未保有・不足セクターを優先提案。
+> **優先順位：連続非減配期数 > 利回り > 増配率** の順で重みづけした総合スコア順に表示。
+
+> 基準：利回り 3.5%以上 ／ 増配率 10%以上CAGR。未保有・不足セクターを優先提案。
+
+> 総合スコア = 安定性(0-50点)×3 ＋ 利回り(0-20点)×2 ＋ 増配率(0-15点)×1　最大205点
+
+> COVID✅ = 2020年（コロナ禍）に減配なし（+20点ボーナス）
 
 ### 🌟 最優先候補（利回り3.5%＋ 増配率10%＋）
 
-| コード | 銘柄名 | セクター | スコア | 現在値 | 利回り | 増配率 | PER | PBR | ROE | 売上成長 |
-|--------|--------|---------|--------|--------|--------|--------|-----|-----|-----|---------|
-| 3452 | B-LOT COMPANY LIMITED | Real Estate（不動産） | **91点** | 1,395円 | 5.23% | +48.5% | 5.8 | 1.30 | 23.4% | +148.0% |
-| 2429 | WORLD HOLDINGS CO LTD | Industrials（資本財・サービス） | **89点** | 2,564円 | 5.05% | +13.0% | 6.6 | 0.92 | 14.2% | +18.5% |
-| 3299 | MUGEN ESTATE CO LTD | Real Estate（不動産） | **88点** | 2,245円 | 5.08% | +66.0% | 8.3 | 1.47 | 19.6% | +54.0% |
-| 4331 | TAKE & GIVE NEEDS CO | Consumer Cyclical（一般消費財） | **86点** | 687円 | 8.88% | +16.0% | 3.8 | 0.57 | 10.7% | +5.1% |
-| 7927 | MUTO SEIKO CO | Technology（テクノロジー） | **82点** | 2,070円 | 5.05% | +59.9% | 8.4 | 0.71 | 8.9% | +7.6% |
-| 9856 | KU HOLDINGS CO LTD | Consumer Cyclical（一般消費財） | **82点** | 1,193円 | 5.36% | +16.3% | 6.9 | 0.55 | 8.5% | +5.1% |
-| 8707 | IWAICOSMO HOLDINGS INC | Financial Services（金融サービス） | **79点** | 3,625円 | 5.10% | +12.1% | 10.4 | 1.20 | 13.3% | +22.2% |
-| 5868 | ROCOCO CO LTD | Technology（テクノロジー） | **77点** | 1,000円 | 3.50% | +32.3% | 8.2 | 1.26 | 11.1% | +25.9% |
-| 8016 | ONWARD HOLDINGS CO LTD | Consumer Cyclical（一般消費財） | **76点** | 718円 | 5.57% | +35.1% | 10.6 | 1.14 | 12.4% | +13.2% |
-| 2435 | CEDAR. CO LTD | Healthcare（ヘルスケア） | **76点** | 220円 | 4.55% | +30.8% | 5.8 | 1.35 | 31.8% | +2.6% |
-| 8985 | JAPAN HOTEL REIT INVESTMENT COR | Real Estate（不動産） | **75点** | 75,600円 | 6.69% | +92.8% | 14.2 | 1.31 | 9.4% | +26.0% |
-| 4725 | CAC HOLDINGS CORP | Technology（テクノロジー） | **74点** | 1,807円 | 5.53% | +13.6% | 9.4 | 0.88 | 9.6% | +0.3% |
-| 3612 | WORLD CO LTD | Consumer Cyclical（一般消費財） | **72点** | 1,421円 | 4.22% | +45.2% | 8.1 | 1.12 | --- | +24.8% |
-| 2986 | LA HOLDINGS CO LTD | Real Estate（不動産） | **72点** | 8,820円 | 3.83% | +26.5% | 8.9 | 2.25 | 25.5% | +21.1% |
-| 2408 | KG INTELLIGENCE CO LTD | Communication Services（通信サービス） | **71点** | 711円 | 5.06% | +37.7% | 15.5 | 0.86 | 5.6% | +12.4% |
-| 1418 | INTERLIFE HLDG CO LTD | Industrials（資本財・サービス） | **70点** | 483円 | 6.21% | +65.5% | 7.7 | 1.64 | 20.1% | -29.3% |
-| 7305 | ARAYA INDUSTRIAL CO | Basic Materials（素材） | **69点** | 5,300円 | 5.66% | +46.6% | 13.5 | 0.77 | 6.0% | -5.3% |
-| 3245 | DEAR LIFE CO.LTD | Real Estate（不動産） | **67点** | 1,033円 | 6.10% | +20.4% | 8.4 | 1.64 | 15.1% | -77.8% |
-| 8291 | NISSAN TOKYO SALES HLDG | Consumer Cyclical（一般消費財） | **67点** | 514円 | 4.67% | +56.5% | 9.2 | 0.53 | 4.9% | -12.0% |
-| 8963 | INVINCIBLE INVESTMENT CORP | Real Estate（不動産） | **66点** | 59,700円 | 6.84% | +117.9% | 15.3 | 1.29 | 8.8% | +11.9% |
-| 8622 | MITO SECURITIES CO | Financial Services（金融サービス） | **65点** | 699円 | 4.29% | +13.6% | 19.0 | 1.02 | 7.5% | +21.4% |
-| 3284 | HOOSIERS HOLDINGS CO LTD | Consumer Cyclical（一般消費財） | **65点** | 1,228円 | 5.70% | +18.9% | 9.6 | 1.12 | 7.1% | -17.7% |
-| 7148 | FINANCIAL PARTNERS GROUP CO LTD | Financial Services（金融サービス） | **64点** | 1,909円 | 6.83% | +67.7% | 8.8 | 2.86 | 31.7% | -46.4% |
-| 4432 | WINGARC1ST INC | Technology（テクノロジー） | **63点** | 2,543円 | 4.48% | +53.4% | 16.8 | 1.95 | 13.1% | +15.7% |
-| 8273 | IZUMI CO LTD | Consumer Cyclical（一般消費財） | **60点** | 1,005円 | 4.48% | +11.9% | 18.2 | 0.74 | 3.7% | +0.9% |
-| 8706 | KYOKUTO SECURITIES CO.LTD | Financial Services（金融サービス） | **60点** | 1,698円 | 6.48% | +21.8% | 12.7 | 1.02 | 7.9% | -10.2% |
-| 7059 | COPRO-HOLDINGS CO LTD | Industrials（資本財・サービス） | **60点** | 854円 | 4.10% | +39.0% | 16.7 | 3.76 | 24.0% | +15.6% |
-| 3431 | MIYAJI ENGINEERING GROUP INC | Industrials（資本財・サービス） | **60点** | 1,718円 | 5.68% | +59.7% | 10.3 | 1.10 | 8.4% | -29.3% |
-| 3571 | SOTOH CO LTD | Consumer Cyclical（一般消費財） | **58点** | 784円 | 5.23% | +13.2% | 32.4 | 0.63 | 1.9% | +11.5% |
-| 9827 | LILYCOLOR CO LTD | Consumer Cyclical（一般消費財） | **57点** | 634円 | 5.68% | +56.5% | 64.8 | 0.96 | 6.3% | +13.0% |
-| 6194 | ATRAE INC | Industrials（資本財・サービス） | **56点** | 634円 | 4.89% | +47.6% | 12.8 | 2.87 | 13.5% | +9.1% |
-| 6718 | AIPHONE CO LTD | Technology（テクノロジー） | **56点** | 2,724円 | 4.77% | +21.3% | 16.0 | 0.65 | 3.9% | --- |
-| 8595 | JAFCO GROUP CO LTD | Financial Services（金融サービス） | **56点** | 2,280円 | 5.37% | +27.7% | 18.9 | 0.87 | 4.6% | -38.1% |
-| 3633 | GMO PEPABO INC | Technology（テクノロジー） | **55点** | 1,850円 | 6.00% | +16.2% | 14.6 | 3.41 | 33.9% | -4.3% |
-| 8929 | AOYAMA ZAISAN NETWORKS CO LIMIT | Real Estate（不動産） | **55点** | 1,225円 | 4.33% | +17.3% | 10.7 | 2.51 | 25.7% | -44.1% |
-| 8958 | GLOBAL ONE REAL ESTATE INVESTME | Real Estate（不動産） | **54点** | 133,600円 | 6.07% | +13.7% | 15.7 | 1.33 | 8.3% | --- |
-| 7172 | JAPAN INVESTMENT ADVISER CO LTD | Industrials（資本財・サービス） | **54点** | 1,857円 | 4.68% | +44.7% | 10.7 | 1.53 | 14.5% | -8.0% |
-| 8007 | TAKASHIMA & CO | Basic Materials（素材） | **54点** | 816円 | 5.58% | +56.9% | 15.7 | 1.20 | 7.5% | -4.2% |
-| 9744 | MEITEC GROUP HOLDINGS INC | Industrials（資本財・サービス） | **53点** | 3,305円 | 6.05% | +35.7% | 18.1 | 5.75 | 31.3% | +1.8% |
-| 9782 | DMS INC | Communication Services（通信サービス） | **52点** | 3,525円 | 8.94% | +94.5% | 22.2 | 1.42 | 7.4% | +3.0% |
-| 5451 | YODOKO LTD | Basic Materials（素材） | **50点** | 1,480円 | 4.74% | +49.6% | 15.6 | 1.08 | 5.8% | -8.4% |
-| 9629 | PCA CORPORATION | Technology（テクノロジー） | **50点** | 1,697円 | 5.13% | +66.5% | 21.5 | 1.82 | 8.1% | +9.0% |
-| 3553 | KYOWA LEATHER CLOTH CO | Basic Materials（素材） | **50点** | 956円 | 4.39% | +10.7% | 42.1 | 0.64 | 1.1% | +6.3% |
-| 6882 | SANSHA ELECTRIC MANUFACTURING | Industrials（資本財・サービス） | **46点** | 974円 | 4.11% | +22.1% | 37.4 | 0.53 | 0.4% | +3.9% |
-| 5988 | PIOLAX INC | Consumer Cyclical（一般消費財） | **46点** | 1,600円 | 5.75% | +18.0% | 48.4 | 0.61 | 0.7% | --- |
-| 3953 | OHMURA SHIGYO CO | Consumer Cyclical（一般消費財） | **45点** | 794円 | 6.30% | +49.5% | --- | 0.58 | -1.3% | -1.6% |
-| 6539 | MATCHING SERVICE JAPAN CO LTD | Industrials（資本財・サービス） | **44点** | 1,024円 | 5.47% | +39.0% | 24.7 | 2.78 | 11.8% | +4.5% |
-| 9602 | TOHO CO LTD | Communication Services（通信サービス） | **43点** | 1,598円 | 3.91% | +60.2% | 26.9 | 2.61 | 11.3% | +27.2% |
-| 6210 | TOYO INNOVEX CO LTD | Industrials（資本財・サービス） | **41点** | 651円 | 5.38% | +29.4% | --- | 0.83 | -2.6% | -5.1% |
-| 3205 | DAIDOH LIMITED | Consumer Cyclical（一般消費財） | **39点** | 822円 | 12.17% | +64.8% | --- | 2.53 | -22.7% | +28.5% |
+| コード | 銘柄名 | セクター | 総合スコア | 安定性 | 連続非減配 | COVID | 現在値 | 利回り | 増配率 | PER | PBR |
+|--------|--------|---------|-----------|--------|-----------|-------|--------|--------|--------|-----|-----|
+| [8273](https://finance.yahoo.co.jp/quote/8273.T) | IZUMI CO LTD | Consumer Cyclical（一般消費財） | **193点** | 46点 | 18期 | ✅ | 1,005円 | 5.97% | +20.3% | 18.2 | 0.74 |
+| [7305](https://finance.yahoo.co.jp/quote/7305.T) | ARAYA INDUSTRIAL CO | Basic Materials（素材） | **193点** | 46点 | 15期 | ✅ | 5,300円 | 5.66% | +46.6% | 13.5 | 0.77 |
+| [9782](https://finance.yahoo.co.jp/quote/9782.T) | DMS INC | Communication Services（通信サービス） | **181点** | 42点 | 13期 | ✅ | 3,525円 | 6.87% | +82.1% | 22.2 | 1.42 |
+| [1418](https://finance.yahoo.co.jp/quote/1418.T) | INTERLIFE HLDG CO LTD | Industrials（資本財・サービス） | **181点** | 42点 | 13期 | ✅ | 483円 | 5.18% | +58.1% | 7.7 | 1.64 |
+| [8929](https://finance.yahoo.co.jp/quote/8929.T) | AOYAMA ZAISAN NETWORKS CO LIMIT | Real Estate（不動産） | **173点** | 42点 | 12期 | ✅ | 1,225円 | 4.33% | +17.3% | 10.7 | 2.51 |
+| [3953](https://finance.yahoo.co.jp/quote/3953.T) | OHMURA SHIGYO CO | Consumer Cyclical（一般消費財） | **163点** | 36点 | 8期 | ✅ | 794円 | 6.30% | +49.5% | --- | 0.58 |
+| [6539](https://finance.yahoo.co.jp/quote/6539.T) | MATCHING SERVICE JAPAN CO LTD | Industrials（資本財・サービス） | **163点** | 36点 | 8期 | ✅ | 1,024円 | 5.47% | +39.0% | 24.7 | 2.78 |
+| [4725](https://finance.yahoo.co.jp/quote/4725.T) | CAC HOLDINGS CORP | Technology（テクノロジー） | **160点** | 36点 | 8期 | ✅ | 1,807円 | 5.53% | +13.6% | 9.4 | 0.88 |
+| [7172](https://finance.yahoo.co.jp/quote/7172.T) | JAPAN INVESTMENT ADVISER CO LTD | Industrials（資本財・サービス） | **155点** | 36点 | 9期 | ✅ | 1,857円 | 4.68% | +44.7% | 10.7 | 1.53 |
+| [2408](https://finance.yahoo.co.jp/quote/2408.T) | KG INTELLIGENCE CO LTD | Communication Services（通信サービス） | **148点** | 31点 | 6期 | ✅ | 711円 | 5.06% | +37.7% | 15.5 | 0.86 |
+| [5451](https://finance.yahoo.co.jp/quote/5451.T) | YODOKO LTD | Basic Materials（素材） | **140点** | 31点 | 6期 | ✅ | 1,480円 | 4.74% | +49.6% | 15.6 | 1.08 |
+| [8291](https://finance.yahoo.co.jp/quote/8291.T) | NISSAN TOKYO SALES HLDG | Consumer Cyclical（一般消費財） | **140点** | 31点 | 5期 | ✅ | 514円 | 4.67% | +56.5% | 9.2 | 0.53 |
+| [7059](https://finance.yahoo.co.jp/quote/7059.T) | COPRO-HOLDINGS CO LTD | Industrials（資本財・サービス） | **134点** | 31点 | 6期 | ✅ | 854円 | 3.51% | +33.7% | 16.7 | 3.76 |
+| [9827](https://finance.yahoo.co.jp/quote/9827.T) | LILYCOLOR CO LTD | Consumer Cyclical（一般消費財） | **133点** | 26点 | 4期 | ✅ | 634円 | 5.68% | +56.5% | 64.8 | 0.96 |
+| [8622](https://finance.yahoo.co.jp/quote/8622.T) | MITO SECURITIES CO | Financial Services（金融サービス） | **125点** | 26点 | 3期 | ✅ | 699円 | 4.29% | +17.0% | 19.0 | 1.02 |
+| [8706](https://finance.yahoo.co.jp/quote/8706.T) | KYOKUTO SECURITIES CO.LTD | Financial Services（金融サービス） | **124点** | 23点 | 2期 | ✅ | 1,698円 | 6.48% | +21.8% | 12.7 | 1.02 |
+| [2429](https://finance.yahoo.co.jp/quote/2429.T) | WORLD HOLDINGS CO LTD | Industrials（資本財・サービス） | **115点** | 21点 | 1期 | ✅ | 2,564円 | 5.05% | +13.0% | 6.6 | 0.92 |
+| [2435](https://finance.yahoo.co.jp/quote/2435.T) | CEDAR. CO LTD | Healthcare（ヘルスケア） | **110点** | 21点 | 1期 | ✅ | 220円 | 4.55% | +30.8% | 5.8 | 1.35 |
+| [6882](https://finance.yahoo.co.jp/quote/6882.T) | SANSHA ELECTRIC MANUFACTURING | Industrials（資本財・サービス） | **107点** | 20点 | 0期 | ✅ | 974円 | 4.11% | +27.8% | 37.4 | 0.53 |
+| [3452](https://finance.yahoo.co.jp/quote/3452.T) | B-LOT COMPANY LIMITED | Real Estate（不動産） | **88点** | 11点 | 5期 | ❌ | 1,395円 | 5.23% | +48.5% | 5.8 | 1.30 |
+| [3299](https://finance.yahoo.co.jp/quote/3299.T) | MUGEN ESTATE CO LTD | Real Estate（不動産） | **88点** | 11点 | 5期 | ❌ | 2,245円 | 5.08% | +66.0% | 8.3 | 1.47 |
+| [8016](https://finance.yahoo.co.jp/quote/8016.T) | ONWARD HOLDINGS CO LTD | Consumer Cyclical（一般消費財） | **80点** | 11点 | 5期 | ❌ | 718円 | 4.18% | +25.7% | 10.6 | 1.14 |
+| [9602](https://finance.yahoo.co.jp/quote/9602.T) | TOHO CO LTD | Communication Services（通信サービス） | **80点** | 11点 | 5期 | ❌ | 1,598円 | 4.44% | +67.6% | 26.9 | 2.61 |
+| [7608](https://finance.yahoo.co.jp/quote/7608.T) | SK JAPAN CO LTD | Consumer Cyclical（一般消費財） | **80点** | 11点 | 5期 | ❌ | 730円 | 4.38% | +63.3% | 10.0 | 1.93 |
+| [2986](https://finance.yahoo.co.jp/quote/2986.T) | LA HOLDINGS CO LTD | Real Estate（不動産） | **74点** | 11点 | 5期 | ❓ | 8,820円 | 3.83% | +26.5% | 8.9 | 2.25 |
+| [8985](https://finance.yahoo.co.jp/quote/8985.T) | JAPAN HOTEL REIT INVESTMENT COR | Real Estate（不動産） | **73点** | 6点 | 4期 | ❌ | 75,600円 | 6.69% | +92.8% | 14.2 | 1.31 |
+| [8963](https://finance.yahoo.co.jp/quote/8963.T) | INVINCIBLE INVESTMENT CORP | Real Estate（不動産） | **73点** | 6点 | 4期 | ❌ | 59,700円 | 6.84% | +117.9% | 15.3 | 1.29 |
+| [8219](https://finance.yahoo.co.jp/quote/8219.T) | AOYAMA TRADING CO | Consumer Cyclical（一般消費財） | **73点** | 6点 | 3期 | ❓ | 2,442円 | 5.49% | +21.8% | 12.9 | 0.68 |
+| [7148](https://finance.yahoo.co.jp/quote/7148.T) | FINANCIAL PARTNERS GROUP CO LTD | Financial Services（金融サービス） | **73点** | 6点 | 4期 | ❌ | 1,909円 | 7.69% | +89.0% | 8.8 | 2.86 |
+| [3284](https://finance.yahoo.co.jp/quote/3284.T) | HOOSIERS HOLDINGS CO LTD | Consumer Cyclical（一般消費財） | **73点** | 6点 | 4期 | ❌ | 1,228円 | 5.05% | +26.8% | 9.6 | 1.12 |
+| [3612](https://finance.yahoo.co.jp/quote/3612.T) | WORLD CO LTD | Consumer Cyclical（一般消費財） | **73点** | 6点 | 4期 | ❓ | 1,421円 | 5.95% | +58.2% | 8.1 | 1.12 |
+| [3431](https://finance.yahoo.co.jp/quote/3431.T) | MIYAJI ENGINEERING GROUP INC | Industrials（資本財・サービス） | **73点** | 6点 | 4期 | ❌ | 1,718円 | 5.68% | +59.7% | 10.3 | 1.10 |
+| [9744](https://finance.yahoo.co.jp/quote/9744.T) | MEITEC GROUP HOLDINGS INC | Industrials（資本財・サービス） | **73点** | 6点 | 4期 | ❌ | 3,305円 | 5.99% | +37.3% | 18.1 | 5.75 |
+| [8007](https://finance.yahoo.co.jp/quote/8007.T) | TAKASHIMA & CO | Basic Materials（素材） | **73点** | 6点 | 4期 | ❌ | 816円 | 5.27% | +54.7% | 15.7 | 1.20 |
+| [6210](https://finance.yahoo.co.jp/quote/6210.T) | TOYO INNOVEX CO LTD | Industrials（資本財・サービス） | **73点** | 6点 | 4期 | ❌ | 651円 | 5.38% | +62.7% | --- | 0.83 |
+| [4432](https://finance.yahoo.co.jp/quote/4432.T) | WINGARC1ST INC | Technology（テクノロジー） | **65点** | 6点 | 4期 | ❓ | 2,543円 | 4.09% | +25.0% | 16.8 | 1.95 |
+| [3245](https://finance.yahoo.co.jp/quote/3245.T) | DEAR LIFE CO.LTD | Real Estate（不動産） | **64点** | 3点 | 2期 | ❌ | 1,033円 | 6.10% | +20.4% | 8.4 | 1.64 |
+| [3205](https://finance.yahoo.co.jp/quote/3205.T) | DAIDOH LIMITED | Consumer Cyclical（一般消費財） | **64点** | 3点 | 2期 | ❓ | 822円 | 12.17% | +64.8% | --- | 2.53 |
+| [9629](https://finance.yahoo.co.jp/quote/9629.T) | PCA CORPORATION | Technology（テクノロジー） | **64点** | 3点 | 2期 | ❌ | 1,697円 | 5.13% | +66.5% | 21.5 | 1.82 |
+| [9287](https://finance.yahoo.co.jp/quote/9287.T) | JAPAN INFRASTRUCTURE FUND INV C | Utilities（公益事業） | **61点** | 3点 | 2期 | ❓ | 66,600円 | 11.58% | +13.5% | 24.9 | --- |
+| [3571](https://finance.yahoo.co.jp/quote/3571.T) | SOTOH CO LTD | Consumer Cyclical（一般消費財） | **61点** | 3点 | 2期 | ❌ | 784円 | 5.10% | +11.4% | 32.4 | 0.63 |
+| [3633](https://finance.yahoo.co.jp/quote/3633.T) | GMO PEPABO INC | Technology（テクノロジー） | **58点** | 1点 | 1期 | ❌ | 1,850円 | 6.00% | +16.2% | 14.6 | 3.41 |
+| [9856](https://finance.yahoo.co.jp/quote/9856.T) | KU HOLDINGS CO LTD | Consumer Cyclical（一般消費財） | **58点** | 1点 | 1期 | ❌ | 1,193円 | 5.36% | +16.3% | 6.9 | 0.55 |
+| [2989](https://finance.yahoo.co.jp/quote/2989.T) | TOKAIDO REIT INC | Real Estate（不動産） | **58点** | 1点 | 1期 | ❓ | 107,600円 | 6.23% | +28.7% | 16.0 | 1.03 |
+| [6718](https://finance.yahoo.co.jp/quote/6718.T) | AIPHONE CO LTD | Technology（テクノロジー） | **56点** | 3点 | 2期 | ❌ | 2,724円 | 4.77% | +27.0% | 16.0 | 0.65 |
+| [5988](https://finance.yahoo.co.jp/quote/5988.T) | PIOLAX INC | Consumer Cyclical（一般消費財） | **55点** | 0点 | 0期 | ❌ | 1,600円 | 5.75% | +27.3% | 48.4 | 0.61 |
+| [6194](https://finance.yahoo.co.jp/quote/6194.T) | ATRAE INC | Industrials（資本財・サービス） | **50点** | 1点 | 1期 | ❓ | 634円 | 4.89% | +47.6% | 12.8 | 2.87 |
+| [5868](https://finance.yahoo.co.jp/quote/5868.T) | ROCOCO CO LTD | Technology（テクノロジー） | **50点** | 3点 | 2期 | ❓ | 1,000円 | 3.50% | +32.3% | 8.2 | 1.26 |
+| [7927](https://finance.yahoo.co.jp/quote/7927.T) | MUTO SEIKO CO | Technology（テクノロジー） | **47点** | 0点 | 0期 | ❌ | 2,070円 | 4.57% | +55.9% | 8.4 | 0.71 |
 
 ### 💰 高利回り候補（増配率は基準以下）
 
-| コード | 銘柄名 | セクター | スコア | 現在値 | 利回り | 増配率 | PER | PBR | ROE | 売上成長 |
-|--------|--------|---------|--------|--------|--------|--------|-----|-----|-----|---------|
-| 8996 | HOUSEFREEDOM CO.LTD | Real Estate（不動産） | **93点** | 997円 | 5.52% | +7.7% | 8.1 | 0.99 | 18.2% | +33.3% |
-| 4595 | MIZUHO MEDY CO LTD | Healthcare（ヘルスケア） | **77点** | 1,770円 | 5.65% | +6.6% | 10.2 | 1.80 | 19.0% | +46.3% |
-| 3290 | ONE REIT INC | Real Estate（不動産） | **77点** | 81,400円 | 6.37% | +0.6% | 7.6 | 1.06 | 7.5% | +14.5% |
-| 7464 | SAFTEC CO LTD | Industrials（資本財・サービス） | **70点** | 1,633円 | 5.21% | +3.2% | 12.9 | 0.40 | 3.0% | +0.7% |
-| 4918 | IVY COSMETICS CORP | Consumer Defensive（生活必需品） | **66点** | 352円 | 5.68% | -20.5% | 4.9 | 0.82 | -4.2% | -5.2% |
-| 8219 | AOYAMA TRADING CO | Consumer Cyclical（一般消費財） | **66点** | 2,442円 | 6.51% | -0.6% | 12.9 | 0.68 | 4.7% | -3.2% |
-| 3459 | SAMTY RESIDENTIAL INVESTMENT CO | Real Estate（不動産） | **66点** | 106,700円 | 5.55% | -0.6% | 18.8 | 1.06 | 6.4% | +11.2% |
-| 2989 | TOKAIDO REIT INC | Real Estate（不動産） | **65点** | 107,600円 | 6.24% | +6.1% | 16.0 | 1.03 | --- | +15.3% |
-| 3488 | CENTRAL REIT INV CORP | Real Estate（不動産） | **64点** | 111,400円 | 6.24% | +4.6% | 14.9 | 1.06 | 6.6% | +1.9% |
-| 3472 | NIPPON HOTEL & RESIDENTIAL INVT | Real Estate（不動産） | **63点** | 70,100円 | 6.41% | +5.3% | 15.7 | 0.78 | 5.9% | --- |
-| 2971 | ESCON JAPAN REIT INVESTMENT COR | Real Estate（不動産） | **62点** | 121,300円 | 6.07% | +0.8% | 17.5 | 1.08 | 6.7% | +8.5% |
-| 3468 | STAR ASIA INVESTOMENT CORPORATI | Real Estate（不動産） | **62点** | 57,300円 | 6.12% | +2.8% | 16.3 | 1.06 | 6.6% | +6.0% |
-| 2499 | NIHONWASOU HOLDINGS INC | Industrials（資本財・サービス） | **61点** | 349円 | 4.58% | +7.5% | 10.5 | 0.85 | 6.3% | -5.2% |
-| 6535 | I MOBILE CO LTD | Communication Services（通信サービス） | **58点** | 475円 | 5.47% | -4.8% | 11.0 | 1.59 | 14.4% | -44.2% |
-| 3470 | MARIMO REGIONAL REVITALIZATION  | Real Estate（不動産） | **54点** | 108,800円 | 6.34% | -2.0% | 15.7 | 1.02 | 5.8% | -2.5% |
-| 8999 | GRANDY HOUSE CORPORATION | Real Estate（不動産） | **54点** | 585円 | 5.47% | +7.5% | 23.1 | 0.69 | 3.1% | -2.3% |
-| 3249 | INDUSTRIAL & INFRAST FD INV COR | Real Estate（不動産） | **53点** | 146,200円 | 4.79% | +2.0% | 20.5 | 1.60 | 8.2% | +18.6% |
-| 7217 | TEIN INC | Consumer Cyclical（一般消費財） | **50点** | 400円 | 4.25% | +4.1% | 23.1 | 0.61 | 3.4% | -2.6% |
-| 5938 | LIXIL CORPORATION | Industrials（資本財・サービス） | **50点** | 1,631円 | 5.52% | +4.7% | 50.0 | 0.70 | 1.5% | +0.5% |
-| 3492 | MIRARTH REAL ESTATE INVESTMENT  | Real Estate（不動産） | **48点** | 87,800円 | 6.36% | -2.8% | 30.0 | 0.87 | 6.3% | --- |
-| 9376 | EURASIA TRAVEL CO | Consumer Cyclical（一般消費財） | **45点** | 884円 | 3.51% | +5.0% | 28.7 | 1.86 | 7.5% | +16.8% |
-| 2183 | LINICAL CO LTD | Healthcare（ヘルスケア） | **36点** | 267円 | 5.99% | +3.4% | --- | 1.06 | -26.6% | -21.8% |
-| 9219 | GIXO LTD | Technology（テクノロジー） | **36点** | 937円 | 5.71% | +0.0% | --- | 3.00 | -5.1% | +11.8% |
-| 3657 | POLE TO WIN HOLDINGS INC | Technology（テクノロジー） | **36点** | 290円 | 5.52% | +5.3% | --- | 1.22 | -33.4% | -20.9% |
-| 9282 | ICHIGO GREEN | Real Estate（不動産） | **34点** | 56,400円 | 6.89% | -0.2% | 26.5 | 1.92 | 4.5% | -1.6% |
-| 9286 | ENEX INFRASTRUCTURE INVESTMENT  | Real Estate（不動産） | **34点** | 57,500円 | 6.96% | -12.8% | 18.0 | --- | --- | --- |
-| 9285 | TOKYO INFRASTRUCTURE ENGY INV C | Utilities（公益事業） | **28点** | 50,400円 | 6.93% | -13.7% | 24.1 | --- | --- | --- |
+| コード | 銘柄名 | セクター | 総合スコア | 安定性 | 連続非減配 | COVID | 現在値 | 利回り | 増配率 | PER | PBR |
+|--------|--------|---------|-----------|--------|-----------|-------|--------|--------|--------|-----|-----|
+| [5938](https://finance.yahoo.co.jp/quote/5938.T) | LIXIL CORPORATION | Industrials（資本財・サービス） | **198点** | 50点 | 24期 | ✅ | 1,631円 | 5.52% | +6.5% | 50.0 | 0.70 |
+| [8999](https://finance.yahoo.co.jp/quote/8999.T) | GRANDY HOUSE CORPORATION | Real Estate（不動産） | **174点** | 42点 | 12期 | ✅ | 585円 | 5.47% | +7.5% | 23.1 | 0.69 |
+| [7464](https://finance.yahoo.co.jp/quote/7464.T) | SAFTEC CO LTD | Industrials（資本財・サービス） | **170点** | 42点 | 14期 | ✅ | 1,633円 | 5.21% | +3.2% | 12.9 | 0.40 |
+| [2183](https://finance.yahoo.co.jp/quote/2183.T) | LINICAL CO LTD | Healthcare（ヘルスケア） | **170点** | 42点 | 11期 | ✅ | 267円 | 5.99% | +3.4% | --- | 1.06 |
+| [3657](https://finance.yahoo.co.jp/quote/3657.T) | POLE TO WIN HOLDINGS INC | Technology（テクノロジー） | **170点** | 42点 | 14期 | ✅ | 290円 | 5.52% | +3.4% | --- | 1.22 |
+| [8958](https://finance.yahoo.co.jp/quote/8958.T) | GLOBAL ONE REAL ESTATE INVESTME | Real Estate（不動産） | **148点** | 36点 | 9期 | ✅ | 133,600円 | 4.76% | +7.1% | 15.7 | 1.33 |
+| [3468](https://finance.yahoo.co.jp/quote/3468.T) | STAR ASIA INVESTOMENT CORPORATI | Real Estate（不動産） | **126点** | 26点 | 4期 | ✅ | 57,300円 | 6.23% | +5.0% | 16.3 | 1.06 |
+| [8707](https://finance.yahoo.co.jp/quote/8707.T) | IWAICOSMO HOLDINGS INC | Financial Services（金融サービス） | **118点** | 26点 | 3期 | ✅ | 3,625円 | 4.00% | +5.5% | 10.4 | 1.20 |
+| [2971](https://finance.yahoo.co.jp/quote/2971.T) | ESCON JAPAN REIT INVESTMENT COR | Real Estate（不動産） | **113点** | 23点 | 2期 | ✅ | 121,300円 | 6.18% | +1.3% | 17.5 | 1.08 |
+| [3290](https://finance.yahoo.co.jp/quote/3290.T) | ONE REIT INC | Real Estate（不動産） | **113点** | 23点 | 2期 | ✅ | 81,400円 | 6.18% | +0.4% | 7.6 | 1.06 |
+| [3249](https://finance.yahoo.co.jp/quote/3249.T) | INDUSTRIAL & INFRAST FD INV COR | Real Estate（不動産） | **111点** | 21点 | 1期 | ✅ | 146,200円 | 5.46% | +6.0% | 20.5 | 1.60 |
+| [3309](https://finance.yahoo.co.jp/quote/3309.T) | SEKISUI HOUSE REIT INC | Real Estate（不動産） | **105点** | 23点 | 2期 | ✅ | 89,700円 | 4.36% | +4.0% | 18.3 | 1.34 |
+| [3488](https://finance.yahoo.co.jp/quote/3488.T) | CENTRAL REIT INV CORP | Real Estate（不動産） | **100点** | 20点 | 0期 | ✅ | 111,400円 | 5.74% | -1.5% | 14.9 | 1.06 |
+| [7217](https://finance.yahoo.co.jp/quote/7217.T) | TEIN INC | Consumer Cyclical（一般消費財） | **96点** | 20点 | 0期 | ✅ | 400円 | 4.25% | +4.1% | 23.1 | 0.61 |
+| [6535](https://finance.yahoo.co.jp/quote/6535.T) | I MOBILE CO LTD | Communication Services（通信サービス） | **58点** | 6点 | 3期 | ❓ | 475円 | 5.47% | -4.8% | 11.0 | 1.59 |
+| [3472](https://finance.yahoo.co.jp/quote/3472.T) | NIPPON HOTEL & RESIDENTIAL INVT | Real Estate（不動産） | **57点** | 3点 | 2期 | ❌ | 70,100円 | 6.41% | +5.3% | 15.7 | 0.78 |
+| [4595](https://finance.yahoo.co.jp/quote/4595.T) | MIZUHO MEDY CO LTD | Healthcare（ヘルスケア） | **57点** | 3点 | 2期 | ❌ | 1,770円 | 5.65% | +6.6% | 10.2 | 1.80 |
+| [8996](https://finance.yahoo.co.jp/quote/8996.T) | HOUSEFREEDOM CO.LTD | Real Estate（不動産） | **57点** | 3点 | 2期 | ❓ | 997円 | 5.52% | +7.7% | 8.1 | 0.99 |
+| [3459](https://finance.yahoo.co.jp/quote/3459.T) | SAMTY RESIDENTIAL INVESTMENT CO | Real Estate（不動産） | **53点** | 3点 | 2期 | ❌ | 106,700円 | 6.01% | +3.9% | 18.8 | 1.06 |
+| [3492](https://finance.yahoo.co.jp/quote/3492.T) | MIRARTH REAL ESTATE INVESTMENT  | Real Estate（不動産） | **49点** | 3点 | 2期 | ❌ | 87,800円 | 6.36% | -2.9% | 30.0 | 0.87 |
+| [9285](https://finance.yahoo.co.jp/quote/9285.T) | TOKYO INFRASTRUCTURE ENGY INV C | Utilities（公益事業） | **47点** | 1点 | 1期 | ❌ | 50,400円 | 14.06% | +1.0% | 24.1 | --- |
+| [9219](https://finance.yahoo.co.jp/quote/9219.T) | GIXO LTD | Technology（テクノロジー） | **47点** | 1点 | 1期 | ❓ | 937円 | 5.71% | +0.0% | --- | 3.00 |
+| [9282](https://finance.yahoo.co.jp/quote/9282.T) | ICHIGO GREEN | Real Estate（不動産） | **40点** | 0点 | 0期 | ❌ | 56,400円 | 6.89% | -0.2% | 26.5 | 1.92 |
+| [4918](https://finance.yahoo.co.jp/quote/4918.T) | IVY COSMETICS CORP | Consumer Defensive（生活必需品） | **40点** | 0点 | 0期 | ❓ | 352円 | 5.68% | -20.5% | 4.9 | 0.82 |
+| [9286](https://finance.yahoo.co.jp/quote/9286.T) | ENEX INFRASTRUCTURE INVESTMENT  | Real Estate（不動産） | **40点** | 0点 | 0期 | ❓ | 57,500円 | 10.42% | -0.3% | 18.0 | --- |
+| [3470](https://finance.yahoo.co.jp/quote/3470.T) | MARIMO REGIONAL REVITALIZATION  | Real Estate（不動産） | **40点** | 0点 | 0期 | ❌ | 108,800円 | 6.34% | -2.0% | 15.7 | 1.02 |
+| [4331](https://finance.yahoo.co.jp/quote/4331.T) | TAKE & GIVE NEEDS CO | Consumer Cyclical（一般消費財） | **40点** | 0点 | 0期 | ❓ | 687円 | 4.51% | +7.6% | 3.8 | 0.57 |
+| [2499](https://finance.yahoo.co.jp/quote/2499.T) | NIHONWASOU HOLDINGS INC | Industrials（資本財・サービス） | **26点** | 0点 | 0期 | ❌ | 349円 | 3.72% | -3.5% | 10.5 | 0.85 |
 
 ### 📈 高増配候補（利回りは基準以下・将来性あり）
 
-| コード | 銘柄名 | セクター | スコア | 現在値 | 利回り | 増配率 | PER | PBR | ROE | 売上成長 |
-|--------|--------|---------|--------|--------|--------|--------|-----|-----|-----|---------|
-| 7050 | FRONTIER INTERNATIONAL INC | Communication Services（通信サービス） | **72点** | 1,444円 | 3.43% | +42.5% | 11.3 | 1.35 | 15.9% | +65.1% |
-| 7608 | SK JAPAN CO LTD | Consumer Cyclical（一般消費財） | **71点** | 730円 | 3.15% | +43.0% | 10.0 | 1.93 | 21.4% | +12.6% |
-| 9687 | KSK CO LTD | Technology（テクノロジー） | **60点** | 4,415円 | 2.81% | +12.7% | 10.4 | 1.49 | 13.8% | +10.0% |
-| 7061 | JAPAN HOSPICES HLDGS INC | Healthcare（ヘルスケア） | **58点** | 728円 | 3.43% | +66.7% | 11.5 | 1.67 | 7.8% | +17.5% |
-| 5903 | SHINPO CO LTD | Industrials（資本財・サービス） | **54点** | 1,205円 | 3.49% | +13.8% | 14.4 | 0.95 | 6.7% | -23.2% |
-| 6927 | HELIOS TECHNO HOLDING CO LTD | Technology（テクノロジー） | **48点** | 1,196円 | 3.43% | +55.6% | 34.7 | 1.25 | 11.9% | +237.2% |
-| 7989 | TACHIKAWA CORP | Consumer Cyclical（一般消費財） | **47点** | 2,508円 | 2.79% | +23.6% | 16.5 | 0.89 | 5.9% | +1.0% |
-| 2501 | SAPPORO HOLDINGS LIMITED | Consumer Defensive（生活必需品） | **8点** | 1,578円 | 1.14% | +21.0% | 40.9 | 2.81 | 7.2% | --- |
+| コード | 銘柄名 | セクター | 総合スコア | 安定性 | 連続非減配 | COVID | 現在値 | 利回り | 増配率 | PER | PBR |
+|--------|--------|---------|-----------|--------|-----------|-------|--------|--------|--------|-----|-----|
+| [7989](https://finance.yahoo.co.jp/quote/7989.T) | TACHIKAWA CORP | Consumer Cyclical（一般消費財） | **161点** | 46点 | 15期 | ✅ | 2,508円 | 2.79% | +23.6% | 16.5 | 0.89 |
+| [2501](https://finance.yahoo.co.jp/quote/2501.T) | SAPPORO HOLDINGS LIMITED | Consumer Defensive（生活必需品） | **153点** | 46点 | 15期 | ✅ | 1,578円 | 1.14% | +21.0% | 40.9 | 2.81 |
+| [6927](https://finance.yahoo.co.jp/quote/6927.T) | HELIOS TECHNO HOLDING CO LTD | Technology（テクノロジー） | **126点** | 31点 | 5期 | ✅ | 1,196円 | 3.43% | +55.6% | 34.7 | 1.25 |
+| [5903](https://finance.yahoo.co.jp/quote/5903.T) | SHINPO CO LTD | Industrials（資本財・サービス） | **108点** | 26点 | 3期 | ✅ | 1,205円 | 3.49% | +13.8% | 14.4 | 0.95 |
+| [9687](https://finance.yahoo.co.jp/quote/9687.T) | KSK CO LTD | Technology（テクノロジー） | **80点** | 20点 | 0期 | ✅ | 4,415円 | 2.81% | +12.7% | 10.4 | 1.49 |
+| [7050](https://finance.yahoo.co.jp/quote/7050.T) | FRONTIER INTERNATIONAL INC | Communication Services（通信サービス） | **36点** | 1点 | 1期 | ❌ | 1,444円 | 3.43% | +42.5% | 11.3 | 1.35 |
+| [7061](https://finance.yahoo.co.jp/quote/7061.T) | JAPAN HOSPICES HLDGS INC | Healthcare（ヘルスケア） | **36点** | 1点 | 1期 | ❓ | 728円 | 3.43% | +66.7% | 11.5 | 1.67 |
 
 ### 📌 セクター分散目的候補（利回り・増配は基準以下だが未保有セクター）
 
-| コード | 銘柄名 | セクター | スコア | 現在値 | 利回り | 増配率 | PER | PBR | ROE | 売上成長 |
-|--------|--------|---------|--------|--------|--------|--------|-----|-----|-----|---------|
-| 8624 | ICHIYOSHI SECURITIES | Financial Services（金融サービス） | **46点** | 1,349円 | 3.48% | +5.5% | 23.9 | 1.51 | 9.2% | +39.8% |
-| 3309 | SEKISUI HOUSE REIT INC | Real Estate（不動産） | **34点** | 89,700円 | 2.60% | -9.5% | 18.3 | 1.34 | --- | --- |
-| 4286 | CL HOLDINGS INC | Communication Services（通信サービス） | **32点** | 973円 | 1.85% | -15.9% | 49.6 | 1.33 | 7.6% | +12.3% |
-| 9287 | JAPAN INFRASTRUCTURE FUND INV C | Utilities（公益事業） | **17点** | 66,600円 | 3.00% | -30.6% | 24.9 | --- | --- | --- |
+| コード | 銘柄名 | セクター | 総合スコア | 安定性 | 連続非減配 | COVID | 現在値 | 利回り | 増配率 | PER | PBR |
+|--------|--------|---------|-----------|--------|-----------|-------|--------|--------|--------|-----|-----|
+| [8595](https://finance.yahoo.co.jp/quote/8595.T) | JAFCO GROUP CO LTD | Financial Services（金融サービス） | **76点** | 20点 | 0期 | ✅ | 2,280円 | 2.92% | +6.9% | 18.9 | 0.87 |
+| [8624](https://finance.yahoo.co.jp/quote/8624.T) | ICHIYOSHI SECURITIES | Financial Services（金融サービス） | **68点** | 20点 | 0期 | ✅ | 1,349円 | 2.22% | -5.7% | 23.9 | 1.51 |
+| [9376](https://finance.yahoo.co.jp/quote/9376.T) | EURASIA TRAVEL CO | Consumer Cyclical（一般消費財） | **21点** | 3点 | 2期 | ❌ | 884円 | 2.71% | +1.5% | 28.7 | 1.86 |
+| [3553](https://finance.yahoo.co.jp/quote/3553.T) | KYOWA LEATHER CLOTH CO | Basic Materials（素材） | **8点** | 0点 | 0期 | ❌ | 956円 | 2.72% | -1.8% | 42.1 | 0.64 |
+| [4286](https://finance.yahoo.co.jp/quote/4286.T) | CL HOLDINGS INC | Communication Services（通信サービス） | **3点** | 1点 | 1期 | ❌ | 973円 | 1.85% | -15.9% | 49.6 | 1.33 |
 
 > ※ 上記は参考情報です。最終的な投資判断はご自身でお願いします。
 
 ## 2. 米国株購入候補提案
 
-> 為替レート：1 USD = 158.8 円（取得時点）
+> 為替レート：1 USD = 158.3 円（取得時点）
 
 > **利回りは源泉税控除後の実質値を表示**
 > - NISA口座：米国源泉税10%のみ控除（日本非課税）
@@ -127,41 +133,41 @@
 
 ### 🌟 最優先候補（実質利回り3.5%＋ × 増配率10%＋）
 
-| Ticker | 銘柄名 | セクター | 現在値 | 表面利回り | 実質(NISA) | 実質(特定) | 増配率 |
-|--------|--------|---------|--------|-----------|-----------|-----------|--------|
-| MAIN | Main Street Capital | REIT | $55.01（約8,736円） | 7.69% | 6.92% | 5.51% | +13.2%CAGR |
+| Ticker | 銘柄名 | セクター | 総合スコア | 連続非減配 | COVID | 現在値 | 表面利回り | 実質(NISA) | 増配率 |
+|--------|--------|---------|-----------|-----------|-------|--------|-----------|-----------|--------|
+| [MAIN](https://finance.yahoo.co.jp/quote/MAIN) | Main Street Capital | REIT | **85点** | 5期 | ❌ | $54.92（約8,691円） | 7.70% | 6.93% | +13.2%CAGR |
 
 ### 💰 高利回り候補（増配率は基準以下）
 
-| Ticker | 銘柄名 | セクター | 現在値 | 表面利回り | 実質(NISA) | 実質(特定) | 増配率 |
-|--------|--------|---------|--------|-----------|-----------|-----------|--------|
-| O | Realty Income | REIT | $60.95（約9,680円） | 5.73% | 5.15% | 4.11% | +5.9%CAGR |
-| VZ | Verizon | 通信 | $49.98（約7,937円） | 5.45% | 4.91% | 3.91% | +1.9%CAGR |
-| T | AT&T | 通信 | $28.31（約4,496円） | 3.93% | 3.54% | 2.82% | -14.5%CAGR |
+| Ticker | 銘柄名 | セクター | 総合スコア | 連続非減配 | COVID | 現在値 | 表面利回り | 実質(NISA) | 増配率 |
+|--------|--------|---------|-----------|-----------|-------|--------|-----------|-----------|--------|
+| [VZ](https://finance.yahoo.co.jp/quote/VZ) | Verizon | 通信 | **144点** | 9期 | ✅ | $50.52（約7,994円） | 5.39% | 4.85% | +1.9%CAGR |
+| [O](https://finance.yahoo.co.jp/quote/O) | Realty Income | REIT | **111点** | 1期 | ✅ | $61.23（約9,690円） | 5.70% | 5.13% | +5.9%CAGR |
 
 ### 📈 高増配候補（利回りは基準以下・将来性あり）
 
-| Ticker | 銘柄名 | セクター | 現在値 | 表面利回り | 実質(NISA) | 実質(特定) | 増配率 |
-|--------|--------|---------|--------|-----------|-----------|-----------|--------|
-| JPM | JPMorgan Chase | 金融 | $286.56（約45,509円） | 1.94% | 1.74% | 1.39% | +10.7%CAGR |
+| Ticker | 銘柄名 | セクター | 総合スコア | 連続非減配 | COVID | 現在値 | 表面利回り | 実質(NISA) | 増配率 |
+|--------|--------|---------|-----------|-----------|-------|--------|-----------|-----------|--------|
+| [JPM](https://finance.yahoo.co.jp/quote/JPM) | JPMorgan Chase | 金融 | **120点** | 9期 | ✅ | $292.66（約46,314円） | 1.90% | 1.71% | +10.7%CAGR |
 
 ### 📌 分散目的候補
 
-| Ticker | 銘柄名 | セクター | 現在値 | 表面利回り | 実質(NISA) | 実質(特定) | 増配率 |
-|--------|--------|---------|--------|-----------|-----------|-----------|--------|
-| PEP | PepsiCo | 生活必需品 | $150.04（約23,828円） | 3.75% | 3.37% | 2.69% | +7.3%CAGR |
-| CVX | Chevron | エネルギー | $201.73（約32,037円） | 3.39% | 3.05% | 2.43% | +6.5%CAGR |
-| ABBV | AbbVie | 医薬品 | $205.07（約32,568円） | 3.20% | 2.88% | 2.29% | +6.0%CAGR |
-| MRK | Merck | 医薬品 | $114.18（約18,133円） | 2.87% | 2.59% | 2.06% | +5.9%CAGR |
-| PG | P&G | 生活必需品 | $144.28（約22,913円） | 2.90% | 2.61% | 2.08% | +5.3%CAGR |
-| KO | Coca-Cola | 生活必需品 | $74.75（約11,871円） | 2.73% | 2.46% | 1.96% | +5.0%CAGR |
-| BLK | BlackRock | 金融 | $957.91（約152,128円） | 2.18% | 1.96% | 1.56% | +6.0%CAGR |
-| JNJ | Johnson & Johnson | 医薬品 | $235.37（約37,380円） | 2.18% | 1.97% | 1.57% | +5.2%CAGR |
-| XOM | ExxonMobil | エネルギー | $159.67（約25,358円） | 2.51% | 2.25% | 1.80% | +3.5%CAGR |
-| CL | Colgate-Palmolive | 生活必需品 | $85.12（約13,518円） | 2.42% | 2.18% | 1.74% | +3.6%CAGR |
-| IBM | IBM | IT・工業 | $241.77（約38,396円） | 2.78% | 2.50% | 1.99% | +1.5%CAGR |
-| EMR | Emerson Electric | IT・工業 | $128.15（約20,352円） | 1.67% | 1.50% | 1.20% | +1.3%CAGR |
-| MMM | 3M | IT・工業 | $141.20（約22,424円） | 2.07% | 1.86% | 1.48% | -12.4%CAGR |
+| Ticker | 銘柄名 | セクター | 総合スコア | 連続非減配 | COVID | 現在値 | 表面利回り | 実質(NISA) | 増配率 |
+|--------|--------|---------|-----------|-----------|-------|--------|-----------|-----------|--------|
+| [PEP](https://finance.yahoo.co.jp/quote/PEP) | PepsiCo | 生活必需品 | **134点** | 9期 | ✅ | $150.62（約23,836円） | 3.73% | 3.36% | +7.3%CAGR |
+| [CVX](https://finance.yahoo.co.jp/quote/CVX) | Chevron | エネルギー | **134点** | 9期 | ✅ | $204.16（約32,309円） | 3.35% | 3.02% | +6.5%CAGR |
+| [ABBV](https://finance.yahoo.co.jp/quote/ABBV) | AbbVie | 医薬品 | **124点** | 9期 | ✅ | $204.42（約32,350円） | 3.21% | 2.89% | +6.0%CAGR |
+| [MRK](https://finance.yahoo.co.jp/quote/MRK) | Merck | 医薬品 | **124点** | 9期 | ✅ | $115.73（約18,314円） | 2.83% | 2.55% | +5.9%CAGR |
+| [PG](https://finance.yahoo.co.jp/quote/PG) | P&G | 生活必需品 | **124点** | 9期 | ✅ | $144.15（約22,812円） | 2.90% | 2.61% | +5.3%CAGR |
+| [KO](https://finance.yahoo.co.jp/quote/KO) | Coca-Cola | 生活必需品 | **124点** | 9期 | ✅ | $74.75（約11,830円） | 2.73% | 2.46% | +5.0%CAGR |
+| [CL](https://finance.yahoo.co.jp/quote/CL) | Colgate-Palmolive | 生活必需品 | **120点** | 9期 | ✅ | $85.85（約13,586円） | 2.40% | 2.16% | +3.6%CAGR |
+| [XOM](https://finance.yahoo.co.jp/quote/XOM) | ExxonMobil | エネルギー | **120点** | 9期 | ✅ | $160.84（約25,453円） | 2.49% | 2.24% | +3.5%CAGR |
+| [IBM](https://finance.yahoo.co.jp/quote/IBM) | IBM | IT・工業 | **120点** | 9期 | ✅ | $250.14（約39,585円） | 2.68% | 2.41% | +1.5%CAGR |
+| [JNJ](https://finance.yahoo.co.jp/quote/JNJ) | Johnson & Johnson | 医薬品 | **116点** | 9期 | ✅ | $234.97（約37,185円） | 2.19% | 1.97% | +5.2%CAGR |
+| [BLK](https://finance.yahoo.co.jp/quote/BLK) | BlackRock | 金融 | **116点** | 9期 | ✅ | $982.27（約155,446円） | 2.12% | 1.91% | +6.0%CAGR |
+| [EMR](https://finance.yahoo.co.jp/quote/EMR) | Emerson Electric | IT・工業 | **112点** | 9期 | ✅ | $132.47（約20,964円） | 1.61% | 1.45% | +1.3%CAGR |
+| [T](https://finance.yahoo.co.jp/quote/T) | AT&T | 通信 | **87点** | 2期 | ✅ | $28.60（約4,526円） | 3.89% | 3.50% | -14.5%CAGR |
+| [MMM](https://finance.yahoo.co.jp/quote/MMM) | 3M | IT・工業 | **60点** | 0期 | ✅ | $146.76（約23,225円） | 1.99% | 1.79% | -12.4%CAGR |
 
 > ※ 上記は参考情報です。最終的な投資判断はご自身でお願いします。
 
