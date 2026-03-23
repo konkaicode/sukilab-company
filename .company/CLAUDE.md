@@ -201,17 +201,24 @@
 │   ├── companies/
 │   ├── es/
 │   └── interviews/
-└── research/
+├── research/
+│   ├── CLAUDE.md
+│   ├── knowledge/
+│   │   ├── ai.md
+│   │   ├── shopify.md
+│   │   ├── wordpress.md
+│   │   ├── marketing.md
+│   │   ├── job-hunting.md
+│   │   └── general.md
+│   └── sources/
+│       └── log.md
+└── finance-portfolio/
     ├── CLAUDE.md
-    ├── knowledge/
-    │   ├── ai.md
-    │   ├── shopify.md
-    │   ├── wordpress.md
-    │   ├── marketing.md
-    │   ├── job-hunting.md
-    │   └── general.md
-    └── sources/
-        └── log.md
+    ├── analyze.py
+    ├── config/
+    │   └── sector_map.yaml
+    ├── data/
+    └── reports/
 ```
 
 ## 部署一覧
@@ -222,6 +229,7 @@
 | 経理部署 | accounting | 売上管理。Notion収益DBのミラー・分析・月次レポート。 |
 | 就活部署 | job-hunting | 就職活動管理。企業研究・ES・面接メモ・選考トラッキング。 |
 | リサーチ部署 | research | 記事DB管理。Browser Use で読み込み・要約・星評価→知識ベースに蓄積。 |
+| ファイナンス部署 | finance-portfolio | 高配当株ポートフォリオ管理。SBI証券CSVを分析し、配当・セクター・購入候補レポートを生成。 |
 
 ---
 

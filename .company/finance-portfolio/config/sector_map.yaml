@@ -1,0 +1,20 @@
+# GICS セクター分類 → 日本語訳マッピング
+# yfinance の info["sector"] で返ってくる英語名を日本語に変換する
+# 表示形式: "Financial Services（金融サービス）"
+
+Financial Services: 金融サービス
+Technology: テクノロジー
+Industrials: 資本財・サービス
+Healthcare: ヘルスケア
+Consumer Defensive: 生活必需品
+Consumer Cyclical: 一般消費財
+Energy: エネルギー
+Basic Materials: 素材
+Real Estate: 不動産
+Utilities: 公益事業
+Communication Services: 通信サービス
+
+# 金融系集中リスク判定に使うGICSセクター名
+# （東証33業種の「銀行業」「保険業」「証券」「その他金融業」に相当）
+_finance_sectors:
+  - Financial Services

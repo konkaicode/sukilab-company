@@ -6,6 +6,8 @@ import urllib.request
 import json
 import re
 import time
+import yfinance as yf
+import yaml
 from datetime import datetime
 from pathlib import Path
 
@@ -21,8 +23,13 @@ TARGET_US_RATIO = 50            # 米国株目標比率 (%)
 DIV_YIELD_THRESHOLD = 3.5       # 理想配当利回り (%)
 DIV_GROWTH_THRESHOLD = 10.0     # 理想増配率CAGR (%)
 
-# 金融系セクターグループ（集中リスク判定用）
-FINANCE_SECTORS = {"銀行業", "保険業", "証券、商品先物取引業", "その他金融業"}
+# セクターマップ読み込み（GICS英語 → 日本語訳）
+_sector_map_path = BASE_DIR / "config" / "sector_map.yaml"
+with open(_sector_map_path, encoding="utf-8") as f:
+    _sector_map_data = yaml.safe_load(f)
+SECTOR_MAP: dict = {k: v for k, v in _sector_map_data.items() if not k.startswith("_")}
+# 金融系セクターグループ（集中リスク判定用、GICS英語名）
+FINANCE_SECTORS = set(_sector_map_data.get("_finance_sectors", ["Financial Services"]))
 
 # 米国源泉税設定
 US_WITHHOLDING_NISA    = 0.10    # NISA口座：米国源泉10%のみ（日本非課税）
@@ -42,22 +49,9 @@ US_WATCHLIST = {
     "金融":         [("JPM", "JPMorgan Chase"), ("BLK", "BlackRock")],
 }
 
-# 購入候補ウォッチリスト（セクター別）
-# 既保有銘柄は自動除外。情報通信は30%超のため除外。
-WATCHLIST = {
-    "医薬品":       [("4503", "アステラス製薬"), ("4502", "武田薬品工業"), ("4568", "第一三共")],
-    "電気機器":     [("6758", "ソニーグループ"), ("6301", "コマツ"), ("6954", "ファナック")],
-    "機械":         [("6273", "SMC"), ("6367", "ダイキン工業")],
-    "小売業":       [("3382", "セブン&アイHD"), ("9843", "ニトリHD"), ("8267", "イオン")],
-    "陸運業":       [("9020", "JR東日本"), ("9022", "JR東海"), ("9005", "東急")],
-    "電気・ガス業": [("9531", "東京ガス"), ("9532", "大阪ガス"), ("9501", "東京電力HD")],
-    "海運業":       [("9101", "日本郵船"), ("9104", "商船三井"), ("9107", "川崎汽船")],
-    "化学":         [("4188", "三菱ケミカルG"), ("4182", "三菱瓦斯化学"), ("4208", "宇部興産")],
-    "食料品":       [("2802", "味の素"), ("2801", "キッコーマン"), ("2897", "日清食品HD")],
-    "銀行業":       [("8411", "みずほFG"), ("8308", "りそなHD")],
-    "不動産業":     [("8801", "三井不動産"), ("8802", "三菱地所")],
-    "その他金融業": [("8591", "オリックス")],
-}
+# 東証スクリーニング設定（EquityQuery）
+SCREEN_SIZE      = 100    # スクリーニング最大取得件数
+SCREEN_MIN_YIELD = 1.5    # スクリーニング最低配当利回り（%。絞り込みはvalue_scoreで行う）
 
 
 def get_latest_csv():
@@ -150,23 +144,17 @@ def parse_csv(path):
 
 
 def get_sector(code):
-    """minkabuから業種（33業種分類）を取得"""
-    url = f"https://minkabu.jp/stock/{code}"
-    req = urllib.request.Request(url, headers={
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-    })
+    """yfinanceからセクターを取得し、日本語訳を付けて返す"""
+    ticker = f"{code}.T"
     try:
-        with urllib.request.urlopen(req, timeout=10) as res:
-            html = res.read().decode("utf-8")
-        # パターン1: JavaScriptオブジェクト内の industrySector
-        m = re.search(r"'industrySector':\s*'([^']+)'", html)
-        if m:
-            return m.group(1).strip()
-        # パターン2: /stock/stocksitemap/xx へのリンクテキスト
-        m = re.search(r'href="/stock/stocksitemap/\d+">([^<]+)</a>', html)
-        if m:
-            return m.group(1).strip()
-        return "不明"
+        info = yf.Ticker(ticker).info
+        sector_en = info.get("sector") or ""
+        if not sector_en:
+            return "不明"
+        sector_ja = SECTOR_MAP.get(sector_en)
+        if sector_ja:
+            return f"{sector_en}（{sector_ja}）"
+        return sector_en
     except Exception:
         return "不明"
 
@@ -265,25 +253,83 @@ def get_us_recommendations(usdjpy):
 
 
 def get_stock_price(code):
-    """minkabuから現在値を取得（ウォッチリスト銘柄用）"""
-    url = f"https://minkabu.jp/stock/{code}"
-    req = urllib.request.Request(url, headers={
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-    })
+    """yfinanceから現在値を取得（ウォッチリスト銘柄用）"""
+    ticker = f"{code}.T"
     try:
-        with urllib.request.urlopen(req, timeout=10) as res:
-            html = res.read().decode("utf-8")
-        # HTMLエスケープ済みJSON: &quot;latest_trade_price&quot;:&quot;7319.0&quot;
-        m = re.search(r'latest_trade_price&quot;:&quot;([^&]+)&quot;', html)
-        if m:
-            return float(m.group(1).replace(",", ""))
-        # フォールバック: stock_price クラスのテキスト
-        m = re.search(r'class="stock_price"[^>]*>\s*([\d,]+(?:\.\d+)?)', html)
-        if m:
-            return float(m.group(1).replace(",", ""))
-        return None
+        fast = yf.Ticker(ticker).fast_info
+        price = getattr(fast, "last_price", None) or getattr(fast, "previous_close", None)
+        return float(price) if price else None
     except Exception:
         return None
+
+
+def calc_value_score(per, pbr, div_yield_pct, roe_pct, growth_pct):
+    """バリュースコア計算（100点満点）
+    PER(25点) + PBR(25点) + 配当利回り(20点) + ROE(15点) + 売上成長率(15点)
+    """
+    score = 0.0
+
+    # PER (25点) — 低いほど高得点
+    if per is not None and 0 < per < 200:
+        if per < 10:    score += 25
+        elif per < 15:  score += 20
+        elif per < 20:  score += 14
+        elif per < 25:  score += 8
+        elif per < 30:  score += 3
+
+    # PBR (25点) — 低いほど高得点
+    if pbr is not None and pbr > 0:
+        if pbr < 0.8:   score += 25
+        elif pbr < 1.0: score += 21
+        elif pbr < 1.5: score += 16
+        elif pbr < 2.0: score += 10
+        elif pbr < 3.0: score += 4
+
+    # 配当利回り (20点) — 高いほど高得点
+    if div_yield_pct is not None and div_yield_pct > 0:
+        if div_yield_pct >= 5.0:   score += 20
+        elif div_yield_pct >= 4.0: score += 16
+        elif div_yield_pct >= 3.5: score += 13
+        elif div_yield_pct >= 3.0: score += 9
+        elif div_yield_pct >= 2.0: score += 4
+
+    # ROE (15点) — 高いほど高得点
+    if roe_pct is not None:
+        if roe_pct >= 20:   score += 15
+        elif roe_pct >= 15: score += 12
+        elif roe_pct >= 10: score += 8
+        elif roe_pct >= 5:  score += 4
+        elif roe_pct >= 0:  score += 1
+
+    # 売上成長率 (15点) — 高いほど高得点
+    if growth_pct is not None:
+        if growth_pct >= 15:   score += 15
+        elif growth_pct >= 10: score += 12
+        elif growth_pct >= 5:  score += 8
+        elif growth_pct >= 0:  score += 4
+
+    return round(score, 1)
+
+
+def get_value_info(code):
+    """yfinanceからバリュエーション指標を取得（PER・PBR・ROE・売上成長率）"""
+    ticker = f"{code}.T"
+    try:
+        info = yf.Ticker(ticker).info
+        per    = info.get("trailingPE") or info.get("forwardPE")
+        pbr    = info.get("priceToBook")
+        roe    = info.get("returnOnEquity")
+        growth = info.get("revenueGrowth")
+
+        if per is not None and (per <= 0 or per > 200): per = None
+        if pbr is not None and pbr <= 0: pbr = None
+
+        roe_pct    = round(roe * 100, 1)    if roe    is not None else None
+        growth_pct = round(growth * 100, 1) if growth is not None else None
+
+        return per, pbr, roe_pct, growth_pct
+    except Exception:
+        return None, None, None, None
 
 
 def get_schd_dividend_growth():
@@ -313,95 +359,126 @@ def get_schd_dividend_growth():
 
 
 def get_dividend_growth(code):
-    from html.parser import HTMLParser
-
-    class TableParser(HTMLParser):
-        def __init__(self):
-            super().__init__()
-            self.in_td = False
-            self.data = []
-            self.row = []
-        def handle_starttag(self, tag, attrs):
-            if tag == 'tr': self.row = []
-            if tag in ('td', 'th'): self.in_td = True
-        def handle_endtag(self, tag):
-            if tag in ('td', 'th'): self.in_td = False
-            if tag == 'tr' and self.row: self.data.append(self.row[:])
-        def handle_data(self, data):
-            if self.in_td:
-                t = data.strip()
-                if t: self.row.append(t)
-
-    url = f"https://minkabu.jp/stock/{code}/dividend"
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"})
+    """yfinanceから配当履歴を取得し、増配率CAGRと直近年間配当額を返す"""
+    ticker = f"{code}.T"
     try:
-        with urllib.request.urlopen(req, timeout=10) as res:
-            html = res.read().decode('utf-8')
-
-        parser = TableParser()
-        parser.feed(html)
-
-        history = {}
-        forecast = {}
-        for row in parser.data:
-            if not (len(row) >= 4 and re.match(r'\d{4}年', row[0]) and '期' in row[0]):
-                continue
-            if '%' in ''.join(row[1:]) or '円' in ''.join(row[1:]):
-                continue
-            is_forecast = '予想' in row
-            try:
-                fy = int(re.search(r'(\d{4})年', row[0]).group(1))
-                nums = []
-                for v in row[1:]:
-                    v = v.replace(',', '')
-                    if re.match(r'^\d+\.?\d*$', v):
-                        nums.append(float(v))
-                if len(nums) >= 4:
-                    val = nums[3]
-                elif len(nums) >= 3:
-                    val = nums[2]
-                else:
-                    continue
-                if is_forecast:
-                    forecast[fy] = val
-                else:
-                    history[fy] = val
-            except (AttributeError, ValueError):
-                pass
-
-        if len(history) < 2:
+        divs = yf.Ticker(ticker).dividends
+        if divs.empty:
             return None, None, None, {}
 
-        years = sorted(history)
-        first, last = history[years[0]], history[years[-1]]
+        # 年ごとに合算（日本株は通常年2回払い）
+        by_year = {}
+        for dt, amount in divs.items():
+            year = dt.year
+            by_year[year] = round(by_year.get(year, 0) + float(amount), 2)
+
+        # 当年が前年比75%未満なら途中データとして除外
+        # （日本株の年2回配当で期末のみ計上されたケースをカバー）
+        current_year = datetime.now().year
+        if current_year in by_year:
+            prev = by_year.get(current_year - 1, 0)
+            if prev > 0 and by_year[current_year] < prev * 0.75:
+                del by_year[current_year]
+
+        years = sorted(by_year)[-5:]
+        if len(years) < 2:
+            return None, None, None, {}
+
+        hist = {y: by_year[y] for y in years}
+        first, last = by_year[years[0]], by_year[years[-1]]
         n = years[-1] - years[0]
         cagr = ((last / first) ** (1 / n) - 1) * 100 if n > 0 and first > 0 else 0
-        hist_sorted = {y: history[y] for y in years}
-        return round(cagr, 1), hist_sorted, history[years[-1]], forecast
+        return round(cagr, 1), hist, by_year[years[-1]], {}
     except Exception:
         return None, None, None, {}
 
 
+def screen_jp_candidates(held_codes: set) -> list:
+    """yf.EquityQuery で東証全銘柄をスクリーニングして候補リストを返す"""
+    try:
+        q = yf.EquityQuery('and', [
+            yf.EquityQuery('eq', ['region', 'jp']),
+            yf.EquityQuery('gt', ['forward_dividend_yield', SCREEN_MIN_YIELD / 100]),
+        ])
+        result = yf.screen(q, sortField='forward_dividend_yield', sortAsc=False, size=SCREEN_SIZE)
+        quotes = result.get('quotes', [])
+    except Exception as e:
+        print(f"  スクリーニング失敗: {e}")
+        return []
+
+    candidates = []
+    for q_data in quotes:
+        symbol = q_data.get('symbol', '')
+        if not symbol.endswith('.T'):
+            continue
+        code = symbol.replace('.T', '')
+        if len(code) != 4 or not code.isdigit():
+            continue
+        if code in held_codes:
+            continue
+        name = q_data.get('shortName') or q_data.get('longName') or symbol
+        # スクリーン結果から取得できる指標（APIコール削減）
+        price = q_data.get('regularMarketPrice')
+        per   = q_data.get('trailingPE')
+        pbr   = q_data.get('priceToBook')
+        candidates.append({
+            'code': code, 'name': name,
+            'price': float(price) if price else None,
+            'per':   float(per)   if per   else None,
+            'pbr':   float(pbr)   if pbr   else None,
+        })
+
+    return candidates
+
+
 def get_recommendations(held_stocks, sector_val, jp_total):
-    """ウォッチリストから購入候補銘柄を収集・スコアリング"""
+    """EquityQueryで東証をスクリーニングして購入候補銘柄を収集・スコアリング"""
     held_codes = {s["code"] for s in held_stocks if s["section"] != "投信"}
     sector_ratio = {k: v / jp_total * 100 for k, v in sector_val.items()} if jp_total > 0 else {}
+
+    print("  東証スクリーニング中 (EquityQuery)...")
+    screened = screen_jp_candidates(held_codes)
+    print(f"  スクリーニング結果: {len(screened)}件")
 
     candidates = []
     checked = set()
 
-    # セクターを「未保有→不足(<5%)→普通」の順に処理
-    def sector_priority(sec):
-        ratio = sector_ratio.get(sec, 0)
-        if ratio == 0:
-            return 0
-        if ratio < 5:
-            return 1
-        return 2
+    for item in screened:
+        code = item['code']
+        name = item['name']
+        price = item.get('price')  # スクリーン結果から取得済み
+        per   = item.get('per')
+        pbr   = item.get('pbr')
 
-    sorted_sectors = sorted(WATCHLIST.keys(), key=sector_priority)
+        if code in held_codes or code in checked:
+            continue
+        checked.add(code)
 
-    for sec in sorted_sectors:
+        print(f"  候補取得: {code} {name}")
+        cagr, history, latest, _ = get_dividend_growth(code)
+        time.sleep(0.3)
+        if latest is None:
+            continue
+
+        # priceが未取得の場合のみAPI呼び出し
+        if not price:
+            price = get_stock_price(code)
+            time.sleep(0.3)
+        if price is None or price == 0:
+            continue
+
+        # ROE・売上成長率はinfo取得が必要（PER/PBRはスクリーン値を優先）
+        _, _, roe_pct, growth_pct = get_value_info(code)
+        time.sleep(0.3)
+        # PER/PBRのサニティチェック
+        if per is not None and (per <= 0 or per > 200): per = None
+        if pbr is not None and pbr <= 0: pbr = None
+
+        # セクター情報（個別取得）
+        sec = get_sector(code)
+        time.sleep(0.3)
+
+        # セクター保有状況
         ratio = sector_ratio.get(sec, 0)
         if ratio == 0:
             status = "未保有"
@@ -410,41 +487,22 @@ def get_recommendations(held_stocks, sector_val, jp_total):
         else:
             status = f"補強（現在{ratio:.1f}%）"
 
-        for code, name in WATCHLIST[sec]:
-            if code in held_codes or code in checked:
-                continue
-            checked.add(code)
+        div_yield = latest / price * 100
+        value_score = calc_value_score(per, pbr, div_yield, roe_pct, growth_pct)
 
-            print(f"  候補取得: {code} {name}")
-            cagr, history, latest, forecast = get_dividend_growth(code)
-            time.sleep(0.3)
-            if latest is None:
-                continue
+        candidates.append({
+            "code": code, "name": name, "sector": sec,
+            "status": status, "sector_ratio": ratio,
+            "price": price, "div_yield": div_yield,
+            "cagr": cagr, "latest_div": latest,
+            "per": per, "pbr": pbr, "roe": roe_pct, "growth": growth_pct,
+            "value_score": value_score,
+            "meets_yield": div_yield >= DIV_YIELD_THRESHOLD,
+            "meets_growth": cagr is not None and cagr >= DIV_GROWTH_THRESHOLD,
+        })
 
-            price = get_stock_price(code)
-            time.sleep(0.3)
-            if price is None or price == 0:
-                continue
-
-            div_yield = latest / price * 100
-
-            # スコア計算（高利回り＋高増配ほど高スコア）
-            yield_score = div_yield / DIV_YIELD_THRESHOLD
-            growth_score = (cagr / DIV_GROWTH_THRESHOLD) if cagr is not None else 0
-            priority_bonus = 2 if ratio == 0 else (1 if ratio < 5 else 0)
-            score = yield_score + growth_score + priority_bonus
-
-            candidates.append({
-                "code": code, "name": name, "sector": sec,
-                "status": status, "sector_ratio": ratio,
-                "price": price, "div_yield": div_yield,
-                "cagr": cagr, "latest_div": latest, "score": score,
-                "meets_yield": div_yield >= DIV_YIELD_THRESHOLD,
-                "meets_growth": cagr is not None and cagr >= DIV_GROWTH_THRESHOLD,
-            })
-
-    # スコア降順でソート
-    candidates.sort(key=lambda x: x["score"], reverse=True)
+    # バリュースコア降順でソート
+    candidates.sort(key=lambda x: x["value_score"], reverse=True)
     return candidates
 
 
@@ -455,10 +513,12 @@ def _bar(ratio, width=24):
     return "█" * filled + "░" * (width - filled)
 
 
-def generate_report(stocks, totals, dividend_data, sector_data, recommendations=None, us_recommendations=None, usdjpy=150.0):
-    today = datetime.now().strftime("%Y-%m-%d")
+def generate_portfolio_report(stocks, totals, dividend_data, sector_data, today, rec_filename=None):
+    """ポートフォリオレポートを生成（保有状況・配当・セクター分析）"""
     lines = []
     lines.append(f"# ファイナンスポートフォリオ レポート {today}\n")
+    if rec_filename:
+        lines.append(f"> 📋 購入提案レポート → [{rec_filename}](./{rec_filename})\n")
 
     # ── サマリー ──────────────────────────────────────────
     lines.append("## サマリー\n")
@@ -585,7 +645,7 @@ def generate_report(stocks, totals, dividend_data, sector_data, recommendations=
             year_cols = "".join(cell(y) for y in all_years)
         lines.append(f"| {code} | {s['name']} | {sign_str} |{year_cols}")
     lines.append("")
-    lines.append("> (予) は minkabu 予想値")
+    lines.append("> ※ 配当データは Yahoo Finance（yfinance）取得。予想値なし。")
     lines.append("")
 
     # 増配率ランキングと平均
@@ -680,7 +740,7 @@ def generate_report(stocks, totals, dividend_data, sector_data, recommendations=
     sector_sorted = sorted(sector_val.items(), key=lambda x: x[1], reverse=True)
 
     # 金融系合計（銀行+保険+証券+その他金融）
-    finance_val = sum(v for k, v in sector_val.items() if k in FINANCE_SECTORS)
+    finance_val = sum(v for k, v in sector_val.items() if any(fs in k for fs in FINANCE_SECTORS))
     finance_ratio = finance_val / jp_total * 100
 
     lines.append("| セクター | 評価額 | 比率 | バー |")
@@ -852,9 +912,23 @@ def generate_report(stocks, totals, dividend_data, sector_data, recommendations=
         lines.append("✅ 現時点での大きな課題は見当たりません。引き続き積立を継続しましょう。")
     lines.append("")
 
-    # ── 7. 購入候補提案 ──────────────────────────────────
+    # フッターリンク
+    if rec_filename:
+        lines.append("---")
+        lines.append(f"> 📋 購入提案レポート → [{rec_filename}](./{rec_filename})")
+
+    return "\n".join(lines)
+
+
+def generate_recommendation_report(recommendations, us_recommendations, usdjpy, today, portfolio_filename):
+    """購入提案レポートを生成（JP・US購入候補）"""
+    lines = []
+    lines.append(f"# 購入提案レポート {today}\n")
+    lines.append(f"> 📊 ポートフォリオレポート → [{portfolio_filename}](./{portfolio_filename})\n")
+
+    # ── 1. 購入候補提案 ──────────────────────────────────
     if recommendations:
-        lines.append("## 7. 購入候補提案\n")
+        lines.append("## 1. 日本株購入候補提案\n")
         lines.append(f"> 基準：利回り {DIV_YIELD_THRESHOLD}%以上 ／ 増配率 {DIV_GROWTH_THRESHOLD:.0f}%以上CAGR を優先。未保有・不足セクターを優先提案。\n")
 
         # 理想ゾーン（両方クリア）
@@ -864,12 +938,18 @@ def generate_report(stocks, totals, dividend_data, sector_data, recommendations=
         others = [r for r in recommendations if not r["meets_yield"] and not r["meets_growth"]]
 
         def fmt_rec(r):
-            cagr_str = f"{r['cagr']:+.1f}%CAGR" if r["cagr"] is not None else "増配データなし"
-            return (f"| {r['code']} | {r['name']} | {r['sector']} | {r['status']} "
-                    f"| {r['price']:,.0f} 円 | {r['div_yield']:.2f}% | {cagr_str} |")
+            cagr_str   = f"{r['cagr']:+.1f}%" if r["cagr"] is not None else "---"
+            per_str    = f"{r['per']:.1f}"     if r["per"]  is not None else "---"
+            pbr_str    = f"{r['pbr']:.2f}"     if r["pbr"]  is not None else "---"
+            roe_str    = f"{r['roe']:.1f}%"    if r["roe"]  is not None else "---"
+            growth_str = f"{r['growth']:+.1f}%" if r["growth"] is not None else "---"
+            return (f"| {r['code']} | {r['name']} | {r['sector']} "
+                    f"| **{r['value_score']:.0f}点** "
+                    f"| {r['price']:,.0f}円 | {r['div_yield']:.2f}% | {cagr_str} "
+                    f"| {per_str} | {pbr_str} | {roe_str} | {growth_str} |")
 
-        header = "| コード | 銘柄名 | セクター | セクター状況 | 現在値 | 利回り | 増配率 |"
-        sep    = "|--------|--------|---------|------------|--------|--------|--------|"
+        header = "| コード | 銘柄名 | セクター | スコア | 現在値 | 利回り | 増配率 | PER | PBR | ROE | 売上成長 |"
+        sep    = "|--------|--------|---------|--------|--------|--------|--------|-----|-----|-----|---------|"
 
         if ideal:
             lines.append(f"### 🌟 最優先候補（利回り{DIV_YIELD_THRESHOLD}%＋ 増配率{DIV_GROWTH_THRESHOLD:.0f}%＋）\n")
@@ -906,9 +986,9 @@ def generate_report(stocks, totals, dividend_data, sector_data, recommendations=
         lines.append("> ※ 上記は参考情報です。最終的な投資判断はご自身でお願いします。")
         lines.append("")
 
-    # ── 米国株購入候補 ────────────────────────────────────
+    # ── 2. 米国株購入候補 ────────────────────────────────────
     if us_recommendations:
-        lines.append("## 8. 米国株購入候補提案\n")
+        lines.append("## 2. 米国株購入候補提案\n")
         lines.append(f"> 為替レート：1 USD = {usdjpy:.1f} 円（取得時点）\n")
         lines.append("> **利回りは源泉税控除後の実質値を表示**")
         lines.append(f"> - NISA口座：米国源泉税10%のみ控除（日本非課税）")
@@ -969,6 +1049,10 @@ def generate_report(stocks, totals, dividend_data, sector_data, recommendations=
         lines.append("> ※ 上記は参考情報です。最終的な投資判断はご自身でお願いします。")
         lines.append("")
 
+    # フッターリンク
+    lines.append("---")
+    lines.append(f"> 📊 ポートフォリオレポート → [{portfolio_filename}](./{portfolio_filename})")
+
     return "\n".join(lines)
 
 
@@ -1009,7 +1093,7 @@ def main():
         print(f"  {code} {s['name']}: {sector}")
         time.sleep(0.3)
 
-    # セクター比率（推奨銘柄取得に必要）
+    # セクター比率
     sector_val = {}
     for s in stocks:
         if s["section"] == "投信":
@@ -1018,21 +1102,44 @@ def main():
         sector_val[sec] = sector_val.get(sec, 0) + s["total_val"]
     jp_total = sum(sector_val.values()) or 1
 
-    print("日本株購入候補データ取得中...")
-    recommendations = get_recommendations(stocks, sector_val, jp_total)
+    today = datetime.now().strftime("%Y-%m-%d")
+    portfolio_filename = f"{today}-portfolio.md"
+    rec_filename       = f"{today}-recommendations.md"
 
-    print("USD/JPY レート取得中...")
-    usdjpy = get_usdjpy()
-    print(f"  1 USD = {usdjpy:.1f} 円")
+    # ── ポートフォリオレポート出力 ────────────────────────
+    portfolio_report = generate_portfolio_report(
+        stocks, totals, dividend_data, sector_data, today, rec_filename=rec_filename
+    )
+    portfolio_path = REPORT_DIR / portfolio_filename
+    portfolio_path.write_text(portfolio_report, encoding="utf-8")
+    print(f"\nポートフォリオレポート出力: {portfolio_path}")
 
-    print("米国株購入候補データ取得中...")
-    us_recommendations = get_us_recommendations(usdjpy)
+    # ── 購入提案レポートの確認 ────────────────────────────
+    print("\n購入提案レポートも作成しますか？ [y/N]: ", end="", flush=True)
+    try:
+        answer = input().strip().lower()
+    except EOFError:
+        answer = ""
 
-    report = generate_report(stocks, totals, dividend_data, sector_data, recommendations, us_recommendations, usdjpy)
+    if answer == "y":
+        print("\n日本株購入候補データ取得中（東証全銘柄スクリーニング）...")
+        recommendations = get_recommendations(stocks, sector_val, jp_total)
 
-    out_path = REPORT_DIR / f"{datetime.now().strftime('%Y-%m-%d')}-report.md"
-    out_path.write_text(report, encoding="utf-8")
-    print(f"\nレポート出力: {out_path}")
+        print("USD/JPY レート取得中...")
+        usdjpy = get_usdjpy()
+        print(f"  1 USD = {usdjpy:.1f} 円")
+
+        print("米国株購入候補データ取得中...")
+        us_recommendations = get_us_recommendations(usdjpy)
+
+        rec_report = generate_recommendation_report(
+            recommendations, us_recommendations, usdjpy, today, portfolio_filename
+        )
+        rec_path = REPORT_DIR / rec_filename
+        rec_path.write_text(rec_report, encoding="utf-8")
+        print(f"購入提案レポート出力: {rec_path}")
+    else:
+        print("購入提案レポートをスキップしました。")
 
 
 if __name__ == "__main__":
