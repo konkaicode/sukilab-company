@@ -12,7 +12,8 @@
 ## 同期ツール
 - **使用ツール**: `ntn`（Notion 公式 CLI）← 2026-03-22 より変更
 - **旧ツール**: Notion MCP（廃止。セマンティック検索の取得漏れ問題のため）
-- **認証**: `NOTION_API_TOKEN`（`~/.bashrc` に設定済み）
+- **認証**: `NOTION_API_TOKEN`（WSLの `~/.bashrc` に設定済み）
+- **重要**: ntn は WSL にのみインストール済み。**Windows ネイティブ・WSL どちらで Claude Code を起動していても、常に WSL 経由で実行すること。**
 
 ## フォルダ構成
 - `revenue.csv` — 全売上データ（Notionと同期）
@@ -65,6 +66,38 @@ NOTION_API_TOKEN="ここに貼り付け" npx ntn api v1/...
 
 > 2026-03-23 実例: `source ~/.bashrc` では古いトークンが読まれ認証失敗。
 > `grep` で正しいトークンを確認し直接指定することで解決。
+
+---
+
+## WSL経由 Notion CLI 同期フロー
+
+> Windows ネイティブ・WSL どちらの Claude Code でも、以下の手順で実行する。
+
+### Step 1: トークン取得
+```bash
+wsl bash -c "grep NOTION_API_TOKEN ~/.bashrc | head -1"
+```
+→ `export NOTION_API_TOKEN="ntn_xxxx..."` が返ってくる。
+
+### Step 2: データ取得
+```bash
+wsl bash -c "NOTION_API_TOKEN='ntn_xxxx...' npx ntn api v1/data_sources/e2b61a38-4509-4e48-a938-8536c35ccc6b/query -d '{\"page_size\":100}'"
+```
+- `source ~/.bashrc` は使わない（古いトークンが読まれる場合があるため）
+- トークンは Step 1 で取得した値を直接指定する
+
+### Step 3: CSV変換
+取得した JSON を以下のカラムで `revenue.csv` に変換・上書きする：
+```
+notion_id, 名称, クライアント, 仕事内容, 単価, 個, 発生日, 請求日, 進捗状況, freee
+```
+WSL の python3 を使う場合:
+```bash
+wsl bash -c "NOTION_API_TOKEN='...' npx ntn api v1/data_sources/e2b61a38-4509-4e48-a938-8536c35ccc6b/query -d '{\"page_size\":100}' | python3 -c \"...\""
+```
+
+### Step 4: 確認
+取得件数と Notion 表示件数が一致しているかを確認し、`sync.md` に記録する。
 
 ---
 
