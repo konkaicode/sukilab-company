@@ -1,11 +1,11 @@
 # 同期ログ
 
 ## 最終同期
-- **日時**: 2026-03-24
-- **取得件数**: 44件
-- **前回比**: ±0件
-- **同期方法**: WSL経由 `wsl bash -c "NOTION_API_TOKEN='...' npx ntn api v1/data_sources/e2b61a38-4509-4e48-a938-8536c35ccc6b/query -d '{"page_size":100}'"` → Node.jsでCSV変換
-- **備考**: Windows移行後、WSL経由でntn CLIを実行。Notion表示件数（44件）と完全一致。
+- **日時**: 2026-04-01
+- **取得件数**: 45件
+- **前回比**: +1件（JALコース追加）
+- **同期方法**: WSL経由 `wsl bash -c "NOTION_API_TOKEN='...' npx ntn api v1/data_sources/...query"` → Python3でCSV変換
+- **備考**: 3月末締め同期。レポート: reports/2026-04-01-report.md
 
 ## 同期履歴
 | 日付 | 件数 | 備考 |
@@ -15,6 +15,7 @@
 | 2026-03-22 | 43件 | ntn CLI（/v1/data_sources/{id}/query）で全件取得。Notion表示件数と完全一致 |
 | 2026-03-23 | 44件 | +1件（ドローン塾埼玉校バナー追加セクション）。トークン直接指定で実行 |
 | 2026-03-24 | 44件 | ±0件。Windows移行後、WSL経由での初同期。 |
+| 2026-04-01 | 45件 | +1件（JALコース）。3月末締め同期。 |
 
 ## 部署アップデート履歴
 | 日付 | 内容 |

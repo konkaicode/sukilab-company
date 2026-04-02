@@ -70,7 +70,26 @@ PER(25点) + PBR(25点) + 配当利回り(20点) + ROE(15点) + 売上成長率(
 | stock_skills GitHub リポジトリ | https://github.com/okikusan-public/stock_skills |
 
 ## こんちゃんへの対応パターン
-- 「レポート作って」「分析して」 → `data/` に最新CSVが入っているか確認してから `python3 analyze.py` を実行
+- 「レポート作って」「分析して」 → `data/` に最新CSVが入っているか確認してから `python analyze.py` を実行（Windowsなので `python` を使う）
 - 「購入候補を出して」 → レポート実行後に `y` で提案レポートも生成
 - 「セクターが偏っている？」 → portfolio.md のセクター分析セクションを参照
 - 「〇〇を追加した」 → 新しいCSVを `data/` に入れてレポートを再生成
+
+## Notion DB 連携（必須）
+
+レポート生成後は **必ず** 以下の Notion DB にページを作成する。
+
+- **DB URL**: https://www.notion.so/3335d3caad5b806fbbf0c9ae1362c27e?v=3335d3caad5b80df92e9000c7d173969
+- **data_source_id**: `3335d3ca-ad5b-8064-8827-000b221e492f`
+- **ツール**: Notion MCP（`mcp__claude_ai_Notion__notion-create-pages`）
+
+### ページ作成ルール
+
+| レポート種別 | 名前の形式 | ジャンル | アイコン |
+|------------|-----------|---------|---------|
+| ポートフォリオレポート | `YYYY-MM-DD ポートフォリオレポート` | レポート | 📊 |
+| 購入提案レポート | `YYYY-MM-DD 購入提案レポート` | レコメンド | 🛒 |
+
+- `date:作成日:start` にレポート日付（YYYY-MM-DD）を必ずセットする
+- スマホで見やすいよう、テーブルとセクション見出しを使ってコンパクトにまとめる
+- ポートフォリオ ↔ 購入提案レポート間で相互リンクを入れる
