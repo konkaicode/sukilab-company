@@ -1,46 +1,55 @@
 notion_id,名称,クライアント,仕事内容,単価,個,発生日,請求日,進捗状況,freee
-2fc5d3ca-ad5b-800b-af8c-d2db38df929d,ドローン塾 栃木真岡校,tech-drone,WEB制作,17000,1,2026-01-31,2026-01-31,支払済み,TRUE
-2fc5d3ca-ad5b-8012-9134-f07b74f11da5,ドローン塾 大分校,tech-drone,WEB制作,17000,1,2026-02-01,2026-02-03,支払済み,TRUE
-2fc5d3ca-ad5b-8014-bda6-f85d7014a0f2,ドローン塾 愛媛校,tech-drone,WEB制作,17000,1,2026-01-31,2026-01-31,支払済み,TRUE
-2fc5d3ca-ad5b-8015-b8a2-e8692585fe9d,ドローン塾 新LP埼玉校,tech-drone,WEB制作,85500,1,2026-01-31,2026-01-31,支払済み,TRUE
-2fc5d3ca-ad5b-8017-ad55-c56d4abefcd3,ドローン塾 お問い合わせ迷惑メールより目立たせる,tech-drone,WEB制作,2200,1,2026-01-31,2026-01-31,支払済み,TRUE
-2fc5d3ca-ad5b-801f-8d98-cac02fcaa998,ドローン塾 フロントページお問い合わせ変更,tech-drone,WEB制作,5500,1,2026-01-31,2026-01-31,支払済み,TRUE
-2fc5d3ca-ad5b-8020-962f-f884e4de15ca,ドローン塾 東京池袋校,tech-drone,WEB制作,17000,1,2026-01-31,2026-01-31,支払済み,TRUE
-2fc5d3ca-ad5b-8039-9863-e95cebe26c12,ドローン塾 東京立川校,tech-drone,WEB制作,17000,1,2026-01-31,2026-01-31,支払済み,TRUE
-2fc5d3ca-ad5b-803b-9a98-cdad05fc31d2,模擬案件チェックシート,RyoHack,メンター,10000,1,2026-01-31,2026-01-31,支払済み,TRUE
-2fc5d3ca-ad5b-8042-ae21-e95332f665f7,Shopify各種,株式会社Craftify,Shopify,189425,1,2025-12-31,2026-01-31,支払済み,TRUE
-2fc5d3ca-ad5b-8061-859f-fa89fa837363,ドローン塾 大阪校を再公開,tech-drone,WEB制作,1100,1,2026-01-31,2026-01-31,支払済み,TRUE
-2fc5d3ca-ad5b-8067-8a7c-c912be69bd31,ドローン塾 名古屋校,tech-drone,WEB制作,17000,1,2026-01-31,2026-01-31,支払済み,TRUE
-2fc5d3ca-ad5b-8091-92fe-e5d30034433e,ドローン塾 福岡筑後校,tech-drone,WEB制作,17000,1,2026-02-01,2026-02-03,支払済み,TRUE
-2fc5d3ca-ad5b-8092-8628-c3c84ee66d9a,ドローン塾 山口校,tech-drone,WEB制作,17000,1,2026-01-31,2026-01-31,支払済み,TRUE
-2fc5d3ca-ad5b-80a5-9b2e-f5baf6430bc1,ドローン塾 合宿コース お問い合わせ・電話番号変更,tech-drone,WEB制作,5500,1,2026-01-31,2026-01-31,支払済み,TRUE
-2fc5d3ca-ad5b-80a7-b474-e35872973c0f,Pasco,竹井 修平(株式会社白瑛),WEB制作,159500,1,2026-01-31,,未請求,FALSE
-2fc5d3ca-ad5b-80b3-9003-f007b5a1afea,reCAPTCHAをcloudflare turnstileに変更,tech-drone,WEB制作,16500,1,2026-02-04,2026-02-04,支払済み,TRUE
-2fc5d3ca-ad5b-80b6-a5e3-d6619a27bc96,ドローン塾 仙台校,tech-drone,WEB制作,20000,1,2026-01-31,2026-01-31,支払済み,TRUE
-2fc5d3ca-ad5b-80c8-8e58-e0ad71b4147d,charme｜TOPページ,株式会社NineConsulting,WEB制作,45000,1,2025-12-31,2026-01-31,支払済み,TRUE
-2fc5d3ca-ad5b-80cf-91ed-c5bb3ae861ba,QO英語版サイト,株式会社ITEM,WEB制作,110000,1,2025-12-31,2026-01-31,支払済み,TRUE
-2fc5d3ca-ad5b-80d9-ac0f-e970ae105bbc,ドローン塾 講師スワイパー切り替え,tech-drone,WEB制作,2200,1,2026-01-31,2026-01-31,支払済み,TRUE
-2fc5d3ca-ad5b-80db-92d2-e03fbae9ae78,ドローン塾 横浜校,tech-drone,WEB制作,17000,1,2026-01-31,2026-01-31,支払済み,TRUE
-2fc5d3ca-ad5b-80ea-bdb0-f2f5ecd6d18a,ドロビジ 元の料金表に変更 ,tech-drone,WEB制作,1100,1,2026-01-31,2026-01-31,支払済み,TRUE
-2fc5d3ca-ad5b-80ee-b4c3-ca63897cb14c,沼脱FB,RyoHack,メンター,3000,3,2026-01-31,2026-01-31,支払済み,TRUE
-2fd5d3ca-ad5b-8004-8f3e-c24a327f235f,のとくまのステイ,山田 友梨(ひらっこさん),WEB制作,65000,1,2026-02-04,2026-02-28,支払済み,TRUE
-2fd5d3ca-ad5b-801c-9be2-f69f6b5bf443,沼脱FB,RyoHack,メンター,8000,1,2026-02-04,2026-02-14,支払済み,TRUE
-3015d3ca-ad5b-8090-ac64-f9e3bf18ae79,ドローン塾 兵庫姫路,tech-drone,WEB制作,17000,1,2026-02-08,2026-02-14,支払済み,TRUE
-3015d3ca-ad5b-80ab-a18e-d02e0243ac12,TAYOL / 京産,株式会社Craftify,Shopify,290000,1,2026-02-08,,未請求,FALSE
-3015d3ca-ad5b-80b5-9ad8-cb84a2c6d6e7,ウィズメタック,株式会社Craftify,Shopify,97000,1,2025-12-31,,未請求,FALSE
-3015d3ca-ad5b-80df-9c28-c3f0e12cb9a5,ドローン塾 京都天王寺,tech-drone,WEB制作,17000,1,2026-02-08,2026-02-14,支払済み,TRUE
-3025d3ca-ad5b-8081-9636-d670acaf98a3,栃木校の料金表＆資料差し替え修正,tech-drone,WEB制作,1100,1,2026-02-09,2026-02-09,支払済み,TRUE
-3025d3ca-ad5b-80a3-91b3-c8f504aca00d,愛媛校の料金表修正,tech-drone,WEB制作,1100,1,2026-02-09,2026-02-09,支払済み,TRUE
-3035d3ca-ad5b-8045-9ea1-f8c45528dd2d,mow,株式会社ITEM,WEB制作,110000,1,2026-02-10,2026-02-28,請求済み,TRUE
-3035d3ca-ad5b-80cc-b713-d1f3e3b68a6d,ワンキャリアLP,株式会社ITEM,WEB制作,110000,1,2026-02-10,2026-02-28,請求済み,TRUE
-30a5d3ca-ad5b-8015-a3d5-e36e766ac7fc,ドローン塾 千葉浜野,tech-drone,WEB制作,17000,1,2026-02-17,2026-02-17,支払済み,TRUE
-30a5d3ca-ad5b-8050-97ae-eee50fffbd33,Pasco PC版,竹井 修平(株式会社白瑛),WEB制作,74800,1,2026-02-17,,未請求,FALSE
-30b5d3ca-ad5b-8027-89cb-e15ce4c84df4,サーマルソリューション,ちかさん,WEB制作,90000,1,2026-02-18,2026-02-28,支払済み,TRUE
-3165d3ca-ad5b-807d-88b2-c8865ba03f9d,RhumbLine,株式会社ITEM,WEB制作,110000,1,2025-12-31,2026-02-28,請求済み,TRUE
-3165d3ca-ad5b-809e-92a8-f30d136807f3,やま幸,株式会社ITEM,WEB制作,275000,1,2026-03-01,,未請求,FALSE
-31a5d3ca-ad5b-808e-9b80-ea3dbe325adf,Dive gym,山田 友梨(ひらっこさん),WEB制作,40000,1,2026-03-05,2026-03-31,支払済み,TRUE
-31b5d3ca-ad5b-8054-a6cc-f95f7d379793,ドローン塾 福井校,tech-drone,WEB制作,17000,1,2026-03-07,2026-03-31,請求済み,TRUE
-3205d3ca-ad5b-8077-95ed-de87f38596a5,ドローン塾 埼玉＆名古屋 合宿追加など,tech-drone,WEB制作,16500,1,2026-03-10,2026-03-31,請求済み,TRUE
-3275d3ca-ad5b-808c-b23c-cb9868fdcd82,ドローン塾合宿コース リデザイン,tech-drone,WEB制作,46200,1,2026-03-18,2026-03-31,請求済み,TRUE
-32c5d3ca-ad5b-802d-a4da-f045bb158727,ドローン塾埼玉校バナー追加セクション,tech-drone,WEB制作,3300,1,2026-03-23,,未請求,FALSE
-3325d3ca-ad5b-8029-92af-eda01c636b72,JAL コース,tech-drone,WEB制作,58850,1,2026-03-29,,未請求,FALSE
+2fc5d3ca-ad5b-800b-af8c-d2db38df929d,ドローン塾 栃木真岡校,tech-drone,WEB制作,17000,1,2026-01-31,2026-01-31,未実行,TRUE
+2fc5d3ca-ad5b-8012-9134-f07b74f11da5,ドローン塾 大分校,tech-drone,WEB制作,17000,1,2026-02-01,2026-02-03,未実行,TRUE
+2fc5d3ca-ad5b-8014-bda6-f85d7014a0f2,ドローン塾 愛媛校,tech-drone,WEB制作,17000,1,2026-01-31,2026-01-31,未実行,TRUE
+2fc5d3ca-ad5b-8015-b8a2-e8692585fe9d,ドローン塾 新LP埼玉校,tech-drone,WEB制作,85500,1,2026-01-31,2026-01-31,未実行,TRUE
+2fc5d3ca-ad5b-8017-ad55-c56d4abefcd3,ドローン塾 お問い合わせ迷惑メールより目立たせる,tech-drone,WEB制作,2200,1,2026-01-31,2026-01-31,未実行,TRUE
+2fc5d3ca-ad5b-801f-8d98-cac02fcaa998,ドローン塾 フロントページお問い合わせ変更,tech-drone,WEB制作,5500,1,2026-01-31,2026-01-31,未実行,TRUE
+2fc5d3ca-ad5b-8020-962f-f884e4de15ca,ドローン塾 東京池袋校,tech-drone,WEB制作,17000,1,2026-01-31,2026-01-31,未実行,TRUE
+2fc5d3ca-ad5b-8039-9863-e95cebe26c12,ドローン塾 東京立川校,tech-drone,WEB制作,17000,1,2026-01-31,2026-01-31,未実行,TRUE
+2fc5d3ca-ad5b-803b-9a98-cdad05fc31d2,模擬案件チェックシート,RyoHack,メンター,10000,1,2026-01-31,2026-01-31,未実行,TRUE
+2fc5d3ca-ad5b-8042-ae21-e95332f665f7,Shopify各種,株式会社Craftify,Shopify,189425,1,2025-12-31,2026-01-31,未実行,TRUE
+2fc5d3ca-ad5b-8061-859f-fa89fa837363,ドローン塾 大阪校を再公開,tech-drone,WEB制作,1100,1,2026-01-31,2026-01-31,未実行,TRUE
+2fc5d3ca-ad5b-8067-8a7c-c912be69bd31,ドローン塾 名古屋校,tech-drone,WEB制作,17000,1,2026-01-31,2026-01-31,未実行,TRUE
+2fc5d3ca-ad5b-8091-92fe-e5d30034433e,ドローン塾 福岡筑後校,tech-drone,WEB制作,17000,1,2026-02-01,2026-02-03,未実行,TRUE
+2fc5d3ca-ad5b-8092-8628-c3c84ee66d9a,ドローン塾 山口校,tech-drone,WEB制作,17000,1,2026-01-31,2026-01-31,未実行,TRUE
+2fc5d3ca-ad5b-80a5-9b2e-f5baf6430bc1,ドローン塾 合宿コース お問い合わせ・電話番号変更,tech-drone,WEB制作,5500,1,2026-01-31,2026-01-31,未実行,TRUE
+2fc5d3ca-ad5b-80a7-b474-e35872973c0f,Pasco,竹井 修平(株式会社白瑛),WEB制作,159500,1,2026-01-31,2026-04-30,未実行,TRUE
+2fc5d3ca-ad5b-80b3-9003-f007b5a1afea,reCAPTCHAをcloudflare turnstileに変更,tech-drone,WEB制作,16500,1,2026-02-04,2026-02-04,未実行,TRUE
+2fc5d3ca-ad5b-80b6-a5e3-d6619a27bc96,ドローン塾 仙台校,tech-drone,WEB制作,20000,1,2026-01-31,2026-01-31,未実行,TRUE
+2fc5d3ca-ad5b-80c8-8e58-e0ad71b4147d,charme｜TOPページ,株式会社NineConsulting,WEB制作,45000,1,2025-12-31,2026-01-31,未実行,TRUE
+2fc5d3ca-ad5b-80cf-91ed-c5bb3ae861ba,QO英語版サイト,株式会社ITEM,WEB制作,110000,1,2025-12-31,2026-01-31,未実行,TRUE
+2fc5d3ca-ad5b-80d9-ac0f-e970ae105bbc,ドローン塾 講師スワイパー切り替え,tech-drone,WEB制作,2200,1,2026-01-31,2026-01-31,未実行,TRUE
+2fc5d3ca-ad5b-80db-92d2-e03fbae9ae78,ドローン塾 横浜校,tech-drone,WEB制作,17000,1,2026-01-31,2026-01-31,未実行,TRUE
+2fc5d3ca-ad5b-80ea-bdb0-f2f5ecd6d18a,ドロビジ 元の料金表に変更 ,tech-drone,WEB制作,1100,1,2026-01-31,2026-01-31,未実行,TRUE
+2fc5d3ca-ad5b-80ee-b4c3-ca63897cb14c,沼脱FB,RyoHack,メンター,3000,3,2026-01-31,2026-01-31,未実行,TRUE
+2fd5d3ca-ad5b-8004-8f3e-c24a327f235f,のとくまのステイ,山田 友梨(ひらっこさん),WEB制作,65000,1,2026-02-04,2026-02-28,未実行,TRUE
+2fd5d3ca-ad5b-801c-9be2-f69f6b5bf443,沼脱FB,RyoHack,メンター,8000,1,2026-02-04,2026-02-14,未実行,TRUE
+3015d3ca-ad5b-8090-ac64-f9e3bf18ae79,ドローン塾 兵庫姫路,tech-drone,WEB制作,17000,1,2026-02-08,2026-02-14,未実行,TRUE
+3015d3ca-ad5b-80ab-a18e-d02e0243ac12,TAYOL / 京産,株式会社Craftify,Shopify,290000,1,2026-02-08,2026-03-31,未実行,TRUE
+3015d3ca-ad5b-80b5-9ad8-cb84a2c6d6e7,ウィズメタック / fruitiara,株式会社Craftify,Shopify,97000,1,2025-12-31,2026-04-30,未実行,FALSE
+3015d3ca-ad5b-80df-9c28-c3f0e12cb9a5,ドローン塾 京都天王寺,tech-drone,WEB制作,17000,1,2026-02-08,2026-02-14,未実行,TRUE
+3025d3ca-ad5b-8081-9636-d670acaf98a3,栃木校の料金表＆資料差し替え修正,tech-drone,WEB制作,1100,1,2026-02-09,2026-02-09,未実行,TRUE
+3025d3ca-ad5b-80a3-91b3-c8f504aca00d,愛媛校の料金表修正,tech-drone,WEB制作,1100,1,2026-02-09,2026-02-09,未実行,TRUE
+3035d3ca-ad5b-8045-9ea1-f8c45528dd2d,mow,株式会社ITEM,WEB制作,110000,1,2026-02-10,2026-02-28,未実行,TRUE
+3035d3ca-ad5b-80cc-b713-d1f3e3b68a6d,ワンキャリアLP,株式会社ITEM,WEB制作,110000,1,2026-02-10,2026-02-28,未実行,TRUE
+30a5d3ca-ad5b-8015-a3d5-e36e766ac7fc,ドローン塾 千葉浜野,tech-drone,WEB制作,17000,1,2026-02-17,2026-02-17,未実行,TRUE
+30a5d3ca-ad5b-8050-97ae-eee50fffbd33,Pasco PC版,竹井 修平(株式会社白瑛),WEB制作,74800,1,2026-02-17,2026-04-30,未実行,TRUE
+30b5d3ca-ad5b-8027-89cb-e15ce4c84df4,サーマルソリューション,ちかさん,WEB制作,90000,1,2026-02-18,2026-02-28,未実行,TRUE
+3165d3ca-ad5b-807d-88b2-c8865ba03f9d,RhumbLine,株式会社ITEM,WEB制作,110000,1,2025-12-31,2026-02-28,未実行,TRUE
+3165d3ca-ad5b-809e-92a8-f30d136807f3,やま幸,株式会社ITEM,WEB制作,275000,1,2026-03-01,,未実行,FALSE
+31a5d3ca-ad5b-808e-9b80-ea3dbe325adf,Dive gym,山田 友梨(ひらっこさん),WEB制作,40000,1,2026-03-05,2026-03-31,未実行,TRUE
+31b5d3ca-ad5b-8054-a6cc-f95f7d379793,ドローン塾 福井校,tech-drone,WEB制作,17000,1,2026-03-07,2026-03-31,未実行,TRUE
+3205d3ca-ad5b-8077-95ed-de87f38596a5,ドローン塾 埼玉＆名古屋 合宿追加など,tech-drone,WEB制作,16500,1,2026-03-10,2026-03-31,未実行,TRUE
+3275d3ca-ad5b-808c-b23c-cb9868fdcd82,ドローン塾合宿コース リデザイン,tech-drone,WEB制作,46200,1,2026-03-18,2026-03-31,未実行,TRUE
+32c5d3ca-ad5b-802d-a4da-f045bb158727,ドローン塾埼玉校バナー追加セクション,tech-drone,WEB制作,3300,1,2026-03-23,2026-04-30,未実行,TRUE
+3325d3ca-ad5b-8029-92af-eda01c636b72,JAL コース,tech-drone,WEB制作,67650,1,2026-03-29,2026-04-30,未実行,TRUE
+33c5d3ca-ad5b-8062-9eca-f8f7afb90ecc,ドローン塾 サービスページ改修,tech-drone,WEB制作,250400,1,2026-04-08,2026-04-30,未実行,TRUE
+33c5d3ca-ad5b-8073-b026-e22e0501315d,浜野校 無料体験会　追加,tech-drone,WEB制作,1650,1,2026-04-08,2026-04-30,未実行,TRUE
+34e5d3ca-ad5b-80d4-af17-d6a893611e0d,ドロシュミ,tech-drone,WEB制作,32540,1,2026-04-26,2026-05-31,未実行,FALSE
+34f5d3ca-ad5b-80cb-9552-d3a9498e62d5,千葉松戸校 作成,tech-drone,WEB制作,20000,1,2026-04-27,2026-04-30,未実行,TRUE
+3515d3ca-ad5b-808c-b473-d80dd9f79288,分校 企業ロゴ変更& 校舎の卒業生インタビューの遷移先変更、アフターサポートの遷移先変更,tech-drone,WEB制作,4400,1,2026-04-29,2026-04-30,未実行,TRUE
+3525d3ca-ad5b-80ad-9c96-e394fa496e82,大分校 福岡校 電話番号変更,tech-drone,WEB制作,1100,1,2026-04-11,2026-04-30,未実行,TRUE
+3535d3ca-ad5b-8027-b1de-c0aacaa10922,誤字脱字 訂正,tech-drone,WEB制作,2200,1,2026-05-01,2026-05-31,未実行,FALSE
+3535d3ca-ad5b-80db-bd71-ccf931c078a4,JAL追加,tech-drone,WEB制作,1100,14,2026-05-01,2026-05-31,未実行,FALSE
+
