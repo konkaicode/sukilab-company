@@ -10,12 +10,17 @@
   背景色 → ジャンル   🔴赤=仕事  🟡黄=個人
   絵文字 → 優先度     🔴高  🔵通常  🟢低
   完了時 → ✅を先頭に  例: ✅🔴 タスク名
+
+時間指定:
+  時間: HH:MM~HH:MM  → 指定時間帯のイベント（30分前リマインダーあり）
+  時間: HH:MM        → 開始のみ指定（終了は+1時間）
+  時間未指定         → 終日イベント（リマインダーなし）
 """
 
 import re
 import sys
 import argparse
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 try:
@@ -120,6 +125,11 @@ def parse_todos(file_path: Path, file_date: date) -> list[dict]:
         genre_match = re.search(r"ジャンル[:：]\s*(仕事|個人)", line)
         genre = genre_match.group(1) if genre_match else detect_genre(title)
 
+        # 時間指定: 時間: HH:MM~HH:MM または 時間: HH:MM
+        time_match = re.search(r"時間:\s*(\d{2}:\d{2})(?:~(\d{2}:\d{2}))?", line)
+        start_time = time_match.group(1) if time_match else None
+        end_time = time_match.group(2) if time_match else None
+
         tasks.append({
             "title": title,
             "priority": priority,
@@ -127,6 +137,8 @@ def parse_todos(file_path: Path, file_date: date) -> list[dict]:
             "file_date": file_date,
             "deadline": deadline,
             "genre": genre,
+            "start_time": start_time,
+            "end_time": end_time,
         })
 
     return tasks
@@ -168,15 +180,44 @@ def clear_sukilab_events(service, target_date: date, cleared: set):
 def create_event(service, task: dict, target_date: date, description: str = ""):
     summary = build_title(task)
     color_id = GENRE_COLOR.get(task["genre"], "5")
+    start_time = task.get("start_time")
+    end_time = task.get("end_time")
 
-    event = {
-        "summary": summary,
-        "description": description,
-        "colorId": color_id,
-        "start": {"date": target_date.isoformat()},
-        "end": {"date": (target_date + timedelta(days=1)).isoformat()},
-        "extendedProperties": {"private": {"source": SOURCE_TAG}},
-    }
+    if start_time:
+        # 時間指定あり → timed イベント + 30分前リマインダー
+        start_dt = datetime.fromisoformat(f"{target_date.isoformat()}T{start_time}:00")
+        if end_time:
+            end_dt = datetime.fromisoformat(f"{target_date.isoformat()}T{end_time}:00")
+        else:
+            end_dt = start_dt + timedelta(hours=1)
+
+        event = {
+            "summary": summary,
+            "description": description,
+            "colorId": color_id,
+            "start": {"dateTime": start_dt.isoformat(), "timeZone": "Asia/Tokyo"},
+            "end": {"dateTime": end_dt.isoformat(), "timeZone": "Asia/Tokyo"},
+            "extendedProperties": {"private": {"source": SOURCE_TAG}},
+            "reminders": {
+                "useDefault": False,
+                "overrides": [{"method": "popup", "minutes": 30}],
+            },
+        }
+    else:
+        # 時間指定なし → 終日イベント・リマインダーなし
+        event = {
+            "summary": summary,
+            "description": description,
+            "colorId": color_id,
+            "start": {"date": target_date.isoformat()},
+            "end": {"date": (target_date + timedelta(days=1)).isoformat()},
+            "extendedProperties": {"private": {"source": SOURCE_TAG}},
+            "reminders": {
+                "useDefault": False,
+                "overrides": [],
+            },
+        }
+
     service.events().insert(calendarId=CALENDAR_ID, body=event).execute()
 
 # ─── メイン処理 ──────────────────────────────────────────────────────────────
