@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Playwright Tips v2.0 - X発信用図解</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* ══ Design Tokens ══ */
+        :root {
+            --bg:       #E4E4EE;
+            --surface:  #FFFFFF;
+            --item-bg:  #F3F3FA;
+            --text:     #1C1C1E;
+            --muted:    #6B7280;
+            --orange:   #F97316;
+            --orange-l: #FFF3E0;
+            --green:    #22C55E;
+            --green-l:  #F0FDF4;
+            --red:      #EF4444;
+            --before:   #AAAAB8;
+            --arrow:    #C0C0CC;
+            --border:   #E4E4EE;
+
+            /* line-height: 160% 統一（全テキスト共通） */
+            --lh: 1.6;
+
+            --shadow-card:   0 2px 8px rgba(15,23,42,.06), 0 12px 40px rgba(15,23,42,.10);
+            --shadow-bubble: 0 4px 16px rgba(15,23,42,.10);
+            --shadow-badge:  0 4px 18px rgba(249,115,22,.38);
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #18181B;
+            font-family: 'Noto Sans JP', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 24px;
+            gap: 20px;
+        }
+
+        /* ══════════════════════════════════
+           Slide root — Auto Layout (vertical)
+           padding 64px は上下余白として機能
+           character-row を含む全要素を中央揃え
+        ══════════════════════════════════ */
+        .slide {
+            width: 1200px;
+            height: 675px;
+            background: linear-gradient(145deg, #D8D8E6 0%, #E6E6F2 50%, #DEDEED 100%);
+
+            /* Auto Layout: 縦・中央揃え */
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            /* Padding Hierarchy Lv1: slide root（character-rowは絶対位置なので余白広め） */
+            padding: 64px 0;
+            gap: 28px;
+
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .slide.active { display: flex; }
+
+        /* 背景装飾円 */
+        .slide::before {
+            content: '';
+            position: absolute;
+            width: 680px; height: 680px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.18);
+            top: -270px; right: -180px;
+            pointer-events: none;
+        }
+        .slide::after {
+            content: '';
+            position: absolute;
+            width: 440px; height: 440px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.11);
+            bottom: -190px; left: -110px;
+            pointer-events: none;
+        }
+
+        /* ── タイトル行 (Auto Layout: horizontal) ── */
+        .slide-head {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .slide-title {
+            font-size: 42px;
+            font-weight: 900;
+            color: var(--text);
+            letter-spacing: -.5px;
+            line-height: var(--lh);
+        }
+
+        /* ══════════════════════════════
+           Cards — Auto Layout (vertical)
+           Padding Hierarchy Lv2: card 40/48px
+        ══════════════════════════════ */
+        .card {
+            background: var(--surface);
+            border-radius: 28px;
+            box-shadow: var(--shadow-card);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Wide card */
+        .card-wide {
+            width: 840px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            padding: 40px 48px; /* Lv2 */
+        }
+
+        /* ── Before/After block ── */
+        .ba-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cards-row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        /* Half card (Auto Layout: vertical) */
+        .card-half {
+            width: 420px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 36px 44px; /* Lv2 */
+        }
+
+        .arrow-col {
+            width: 96px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 38px;
+            font-weight: 700;
+            color: var(--arrow);
+            flex-shrink: 0;
+            line-height: var(--lh);
+        }
+
+        .labels-row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .label {
+            width: 420px;
+            text-align: center;
+            font-size: 36px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            line-height: var(--lh);
+        }
+        .label-spacer { width: 96px; flex-shrink: 0; }
+        .label-before { color: var(--before); }
+        .label-after  { color: var(--orange); }
+
+        /* ══════════════════════════════
+           List items — Auto Layout (horizontal)
+           Padding Hierarchy Lv3: item 14/20px
+        ══════════════════════════════ */
+        .q-list {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .q-item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 14px;
+            background: var(--item-bg);
+            border-radius: 14px;
+            padding: 14px 20px; /* Lv3 */
+        }
+
+        .q-icon {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: var(--orange-l);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+            font-weight: 900;
+            color: var(--orange);
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .q-text {
+            font-size: 21px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: var(--lh);
+        }
+
+        .card-note {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--muted);
+            line-height: var(--lh);
+            text-align: center;
+        }
+
+        /* ── Card icon + text ── */
+        .card-icon { flex-shrink: 0; }
+
+        .card-text {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: var(--lh);
+            text-align: center;
+        }
+
+        .card-desc {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--muted);
+            line-height: var(--lh);
+            text-align: center;
+        }
+
+        /* ══════════════════════════════
+           Grid items — Auto Layout
+           Padding Hierarchy Lv3: 14/18px
+        ══════════════════════════════ */
+        .test-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px 22px;
+            width: 100%;
+        }
+
+        .test-item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 12px;
+            background: var(--item-bg);
+            border-radius: 12px;
+            padding: 14px 18px; /* Lv3 */
+        }
+
+        .test-icon {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: var(--green-l);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .test-label {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: var(--lh);
+        }
+
+        .grid-note {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--muted);
+            line-height: var(--lh);
+            text-align: center;
+            width: 100%;
+        }
+
+        /* ── Summary ── */
+        .summary-icon {
+            width: 76px; height: 76px;
+            border-radius: 50%;
+            background: var(--orange-l);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .summary-main {
+            font-size: 25px;
+            font-weight: 900;
+            color: var(--text);
+            line-height: var(--lh);
+            text-align: center;
+        }
+
+        .summary-sub {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--muted);
+            line-height: var(--lh);
+            text-align: center;
+        }
+
+        /* ══════════════════════════════
+           Character + Speech Bubble
+           絶対位置（Auto Layout外）
+           キャラクターはtranslateYで下げ、足をスライド外にはみ出させる
+        ══════════════════════════════ */
+        .character-row {
+            position: absolute;
+            bottom: 28px;
+            right: 40px;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-end;   /* 吹き出しとキャラクター枠の底辺を揃える */
+            gap: 12px;
+            z-index: 2;
+        }
+
+        .noruman-img {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            flex-shrink: 0;
+            /* 足部分をスライド外に出す → 吹き出しテールが体の中央付近に来る */
+            transform: translateY(22px);
+        }
+
+        /* 吹き出し：borderなし・drop-shadowで自然な影 */
+        .speech-bubble {
+            background: #FFFFFF;
+            border-radius: 10px;
+            /* drop-shadowはテールにも影が適用される */
+            filter: drop-shadow(0 2px 12px rgba(15,23,42,.12)) drop-shadow(0 1px 3px rgba(15,23,42,.06));
+            padding: 8px 13px;
+            position: relative;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            line-height: var(--lh);
+            white-space: nowrap;
+        }
+
+        /* テール：clip-pathの三角形（drop-shadowと一体化） */
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: 11px;
+            right: -10px;
+            width: 13px;
+            height: 16px;
+            background: #FFFFFF;
+            clip-path: polygon(0 20%, 0 80%, 100% 50%);
+        }
+
+        /* ══ Navigation ══ */
+        .nav-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .nav-btn {
+            background: rgba(255,255,255,.14);
+            border: 1px solid rgba(255,255,255,.22);
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background .15s;
+        }
+        .nav-btn:hover:not(:disabled) { background: rgba(255,255,255,.26); }
+        .nav-btn:disabled { opacity: .3; cursor: default; }
+
+        /* ダウンロード・コピーボタン */
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all .15s;
+        }
+        .btn-download {
+            background: #F97316;
+            color: #fff;
+        }
+        .btn-download:hover { background: #EA6C0A; }
+        .btn-copy {
+            background: rgba(255,255,255,.92);
+            color: #1C1C1E;
+        }
+        .btn-copy:hover { background: #fff; }
+
+        /* Playwright コマンドパネル */
+        .cmd-panel {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(18,18,20,.96);
+            color: #fff;
+            font-family: 'Noto Sans JP', sans-serif;
+            border-radius: 14px;
+            padding: 16px 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s, transform .2s;
+            z-index: 999;
+            min-width: 480px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.4);
+        }
+        .cmd-panel.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+        .cmd-panel-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #94A3B8;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 8px;
+        }
+        .cmd-panel code {
+            display: block;
+            background: rgba(255,255,255,.08);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 13px;
+            color: #F97316;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: background .15s;
+        }
+        .cmd-panel code:hover { background: rgba(255,255,255,.14); }
+        .cmd-panel-note {
+            font-size: 11px;
+            color: #64748B;
+            margin-top: 8px;
+        }
+        .cmd-panel-close {
+            position: absolute;
+            top: 12px; right: 14px;
+            background: none; border: none;
+            color: #64748B; font-size: 16px;
+            cursor: pointer; line-height: 1;
+        }
+        .cmd-panel-close:hover { color: #fff; }
+
+        .nav-sep {
+            width: 1px; height: 28px;
+            background: rgba(255,255,255,.18);
+            flex-shrink: 0;
+        }
+
+        .nav-dots { display: flex; gap: 8px; }
+        .nav-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.28);
+            border: none; cursor: pointer;
+            transition: background .15s;
+        }
+        .nav-dot.active { background: #fff; }
+        .slide-counter { color: rgba(255,255,255,.45); font-size: 13px; min-width: 36px; text-align: center; }
+        .hint { color: rgba(255,255,255,.3); font-size: 12px; }
+
+        /* ── トースト通知 ── */
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(28,28,30,.92);
+            color: #fff;
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 10px 20px;
+            border-radius: 100px;
+            opacity: 0;
+            transition: opacity .2s, transform .2s;
+            pointer-events: none;
+            z-index: 999;
+            white-space: nowrap;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     Slide 1: こんな確認漏れ、ありませんか？
+══════════════════════════════════ -->
+<div class="slide active" id="s1">
+    <div class="slide-head">
+        <div class="slide-title">こんな確認漏れ、ありませんか？</div>
+    </div>
+
+    <div class="card card-wide">
+        <div class="q-list">
+            <div class="q-item">
+                <div class="q-icon">?</div>
+                <div class="q-text">このリンク、確認したっけ？</div>
+            </div>
+            <div class="q-item">
+                <div class="q-icon">?</div>
+                <div class="q-text">サンクスページにリダイレクトされる？</div>
+            </div>
+            <div class="q-item">
+                <div class="q-icon">?</div>
+                <div class="q-text">フォームの送信先は大丈夫だっけ？</div>
+            </div>
+        </div>
+        <div class="card-note">更新が多いサイトほど、確認項目はどんどん増える…</div>
+    </div>
+
+    <div class="character-row">
+        <div class="speech-bubble">わかる〜！毎回これで焦ってた</div>
+        <img class="noruman-img" src="konkai-transparent.png" alt="のるまん">
+    </div>
+</div>
+
+<!-- ══════════════════════════════════
+     Slide 2: Playwrightで解決！
+══════════════════════════════════ -->
+<div class="slide" id="s2">
+    <div class="slide-head">
+        <div class="slide-title">Playwrightで解決！</div>
+    </div>
+
+    <div class="ba-block">
+        <div class="cards-row">
+            <div class="card card-half">
+                <div class="card-icon">
+                    <svg width="52" height="52" viewBox="0 0 52 52" fill="none" aria-hidden="true">
+                        <circle cx="26" cy="26" r="22" stroke="#EF4444" stroke-width="2.4"/>
+                        <path d="M18 18l16 16M34 18L18 34" stroke="#EF4444" stroke-width="2.4" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="card-text">30項目以上を<br>手動でチェック</div>
+                <div class="card-desc">見落としのリスクあり<br>毎回時間がかかる…</div>
+            </div>
+
+            <div class="arrow-col">→</div>
+
+            <div class="card card-half">
+                <div class="card-icon">
+                    <svg width="52" height="52" viewBox="0 0 52 52" fill="none" aria-hidden="true">
+                        <circle cx="26" cy="26" r="22" stroke="#22C55E" stroke-width="2.4"/>
+                        <path d="M17 26l6.5 6.5 12-12" stroke="#22C55E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="card-text">Playwright<br>自動テスト！</div>
+                <div class="card-desc">確認漏れゼロ<br>毎回確実・楽！</div>
+            </div>
+        </div>
+
+        <div class="labels-row">
+            <div class="label label-before">Before</div>
+            <div class="label-spacer"></div>
+            <div class="label label-after">After</div>
+        </div>
+    </div>
+
+    <div class="character-row">
+        <div class="speech-bubble">Playwright、最高すぎる！</div>
+        <img class="noruman-img" src="konkai-transparent.png" alt="のるまん">
+    </div>
+</div>
+
+<!-- ══════════════════════════════════
+     Slide 3: 自動でテストする内容
+══════════════════════════════════ -->
+<div class="slide" id="s3">
+    <div class="slide-head">
+        <div class="slide-title">自動でテストする内容</div>
+    </div>
+
+    <div class="card card-wide">
+        <div class="grid-note">テストサーバー上で毎回チェックしていること</div>
+        <div class="test-grid">
+            <div class="test-item">
+                <div class="test-icon">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                        <path d="M3 9l4 4 8-8" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="test-label">ページの表示確認</div>
+            </div>
+            <div class="test-item">
+                <div class="test-icon">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                        <path d="M3 9l4 4 8-8" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="test-label">ボタンの遷移先</div>
+            </div>
+            <div class="test-item">
+                <div class="test-icon">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                        <path d="M3 9l4 4 8-8" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="test-label">フォーム送信</div>
+            </div>
+            <div class="test-item">
+                <div class="test-icon">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                        <path d="M3 9l4 4 8-8" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="test-label">サンクスページへのリダイレクト</div>
+            </div>
+            <div class="test-item">
+                <div class="test-icon">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                        <path d="M3 9l4 4 8-8" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="test-label">メール内容の確認</div>
+            </div>
+            <div class="test-item">
+                <div class="test-icon">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                        <path d="M3 9l4 4 8-8" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="test-label">…etc</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="character-row">
+        <div class="speech-bubble">全部自動でやってくれる！</div>
+        <img class="noruman-img" src="konkai-transparent.png" alt="のるまん">
+    </div>
+</div>
+
+<!-- ══════════════════════════════════
+     Slide 4: 仕組み化が大事！
+══════════════════════════════════ -->
+<div class="slide" id="s4">
+    <div class="slide-head">
+        <div class="slide-title">仕組み化が大事！</div>
+    </div>
+
+    <div class="card card-wide">
+        <div class="summary-icon">
+            <svg width="42" height="42" viewBox="0 0 42 42" fill="none" aria-hidden="true">
+                <path d="M21 7C13.8 7 8 12.8 8 20c0 4.5 2.3 8.5 5.8 10.8V34a2 2 0 002 2h10.4a2 2 0 002-2v-3.2C31.7 28.5 34 24.5 34 20c0-7.2-5.8-13-13-13z" stroke="#F97316" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M17 36h8M18.5 32h5" stroke="#F97316" stroke-width="2.2" stroke-linecap="round"/>
+                <path d="M21 5V3M10.5 8.5l-1.5-1.5M31.5 8.5l1.5-1.5M7 20H5M37 20h-2" stroke="#F97316" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div class="summary-main">
+            人がチェックするとミスをすることがある<br>
+            だから<span style="color:var(--orange)">仕組みで防ぐ</span>
+        </div>
+        <div class="summary-sub">
+            Playwrightで自動テスト環境を整えることで<br>
+            確認漏れゼロ・作業効率アップを同時に実現！
+        </div>
+    </div>
+
+    <div class="character-row">
+        <div class="speech-bubble">仕組み化、大事だよね！</div>
+        <img class="noruman-img" src="konkai-transparent.png" alt="のるまん">
+    </div>
+</div>
+
+<!-- ══ Navigation ══ -->
+<div class="nav-bar">
+    <button class="nav-btn" id="prevBtn" onclick="move(-1)" disabled>← 前へ</button>
+    <div class="nav-dots">
+        <button class="nav-dot active" onclick="go(0)" aria-label="スライド1"></button>
+        <button class="nav-dot"        onclick="go(1)" aria-label="スライド2"></button>
+        <button class="nav-dot"        onclick="go(2)" aria-label="スライド3"></button>
+        <button class="nav-dot"        onclick="go(3)" aria-label="スライド4"></button>
+    </div>
+    <div class="slide-counter" id="counter">1 / 4</div>
+    <button class="nav-btn" id="nextBtn" onclick="move(1)">次へ →</button>
+
+    <div class="nav-sep"></div>
+
+    <button class="action-btn btn-download" onclick="showCmd('dl')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M4 6l3 3 3-3M1 11h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        このスライドを保存
+    </button>
+    <button class="action-btn btn-copy" onclick="showCmd('all')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1h12v12H1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M4 4h6M4 7h6M4 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        全スライドを保存
+    </button>
+</div>
+<div class="hint">← → キーでも切り替えられます</div>
+
+<!-- Playwright コマンドパネル -->
+<div class="cmd-panel" id="cmdPanel">
+    <button class="cmd-panel-close" onclick="closeCmd()">✕</button>
+    <div class="cmd-panel-title">📸 プロンプトにコピーして実行してください</div>
+    <code id="cmdText" onclick="copyCmd(this)">python ...</code>
+    <div class="cmd-panel-note">クリックでコマンドをコピー &nbsp;|&nbsp; screenshots/ フォルダに保存されます</div>
+</div>
+
+<!-- トースト通知 -->
+<div class="toast" id="toast"></div>
+
+<script>
+    let cur = 0;
+    const slides = document.querySelectorAll('.slide');
+    const dots   = document.querySelectorAll('.nav-dot');
+    const total  = slides.length;
+
+    // ── トースト通知 ──
+    function showToast(msg, duration = 2200) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), duration);
+    }
+
+    // ── Playwright コマンドパネル ──
+    const SCRIPT = 'python "C:\\\\cc-company\\\\.company\\\\playground\\\\projects\\\\x-image-generator\\\\screenshot.py"';
+
+    function showCmd(mode) {
+        const panel = document.getElementById('cmdPanel');
+        const cmd   = document.getElementById('cmdText');
+
+        if (mode === 'dl') {
+            cmd.textContent = `${SCRIPT} ${cur + 1}`;
+        } else {
+            cmd.textContent = SCRIPT;
+        }
+        panel.classList.add('show');
+    }
+
+    function closeCmd() {
+        document.getElementById('cmdPanel').classList.remove('show');
+    }
+
+    function copyCmd(el) {
+        navigator.clipboard.writeText(el.textContent)
+            .then(() => showToast('📋 コマンドをコピーしました！プロンプトに貼り付けてください'))
+            .catch(() => showToast('コピーできませんでした'));
+    }
+
+    // パネル外クリックで閉じる
+    document.addEventListener('click', e => {
+        const panel = document.getElementById('cmdPanel');
+        if (panel.classList.contains('show') && !panel.contains(e.target) && !e.target.closest('.action-btn')) {
+            closeCmd();
+        }
+    });
+
+    function go(n) {
+        slides[cur].classList.remove('active');
+        dots[cur].classList.remove('active');
+        cur = n;
+        slides[cur].classList.add('active');
+        dots[cur].classList.add('active');
+        document.getElementById('counter').textContent = `${cur + 1} / ${total}`;
+        document.getElementById('prevBtn').disabled = cur === 0;
+        document.getElementById('nextBtn').disabled = cur === total - 1;
+    }
+
+    function move(dir) {
+        const next = cur + dir;
+        if (next >= 0 && next < total) go(next);
+    }
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'ArrowLeft')  move(-1);
+        if (e.key === 'ArrowRight') move(1);
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>近藤快 | Web制作フリーランス</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Sans:wght@400;500&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Verdana Health Design System */
+        :root {
+            --color-primary:   #0F172A;
+            --color-secondary: #64748B;
+            --color-tertiary:  #059669;
+            --color-bg:        #F8FAFC;
+            --color-surface:   #FFFFFF;
+            --color-border:    #E2E8F0;
+
+            --font-headline: 'Plus Jakarta Sans', sans-serif;
+            --font-body:     'DM Sans', sans-serif;
+            --font-mono:     'Fira Code', monospace;
+
+            --space-xs:  4px;
+            --space-sm:  8px;
+            --space-md:  16px;
+            --space-lg:  24px;
+            --space-xl:  32px;
+            --space-2xl: 48px;
+            --space-3xl: 64px;
+
+            --radius-sm:      4px;
+            --radius-default: 8px;
+            --radius-lg:      16px;
+            --radius-full:    9999px;
+
+            --shadow-md: 0 4px 16px rgba(15,23,42,.07);
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--color-bg);
+            color: var(--color-primary);
+            font-family: var(--font-body);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* ─── Hero ─── */
+        .hero {
+            background: var(--color-primary);
+            color: #fff;
+            padding: var(--space-3xl) var(--space-lg);
+            text-align: center;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(5,150,105,.2);
+            color: #34D399;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            padding: var(--space-xs) var(--space-md);
+            border-radius: var(--radius-full);
+            margin-bottom: var(--space-md);
+        }
+
+        .hero h1 {
+            font-family: var(--font-headline);
+            font-size: 40px;
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: var(--space-md);
+        }
+
+        .hero-sub {
+            font-size: 18px;
+            color: #94A3B8;
+            line-height: 1.6;
+            margin-bottom: var(--space-xl);
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: var(--space-md);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* ─── Buttons ─── */
+        .btn {
+            display: inline-block;
+            text-decoration: none;
+            font-family: var(--font-body);
+            font-size: 16px;
+            font-weight: 500;
+            padding: 12px 28px;
+            border-radius: var(--radius-default);
+            border: none;
+            cursor: pointer;
+            transition: background .15s, border-color .15s;
+        }
+
+        .btn-primary {
+            background: var(--color-tertiary);
+            color: #fff;
+        }
+        .btn-primary:hover { background: #047857; }
+
+        .btn-outline {
+            background: transparent;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,.3);
+        }
+        .btn-outline:hover { border-color: rgba(255,255,255,.6); }
+
+        /* ─── Stats bar ─── */
+        .stats-bar {
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: var(--space-xl) var(--space-lg);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-lg);
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: var(--font-headline);
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--color-secondary);
+            margin-top: var(--space-xs);
+        }
+
+        /* ─── Section wrapper ─── */
+        .section {
+            padding: var(--space-3xl) var(--space-lg);
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            display: inline-block;
+            background: rgba(5,150,105,.1);
+            color: var(--color-tertiary);
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            padding: var(--space-xs) var(--space-md);
+            border-radius: var(--radius-full);
+            margin-bottom: var(--space-sm);
+        }
+
+        .section-title {
+            font-family: var(--font-headline);
+            font-size: 24px;
+            font-weight: 600;
+            line-height: 1.25;
+            margin-bottom: var(--space-2xl);
+        }
+
+        /* ─── Cards ─── */
+        .card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-default);
+            padding: var(--space-lg);
+        }
+
+        .card-elevated {
+            background: var(--color-surface);
+            border-radius: var(--radius-default);
+            padding: var(--space-lg);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* ─── About grid ─── */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-lg);
+        }
+
+        .about-text { color: var(--color-secondary); }
+        .about-text p + p { margin-top: var(--space-md); }
+
+        /* ─── Chips ─── */
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-sm);
+            margin-top: var(--space-md);
+        }
+
+        .chip {
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            padding: 4px 12px;
+            border-radius: var(--radius-sm);
+            background: var(--color-bg);
+            color: var(--color-primary);
+            border: 1px solid var(--color-border);
+        }
+
+        .chip-active {
+            background: var(--color-primary);
+            color: #fff;
+            border-color: var(--color-primary);
+        }
+
+        .skill-subtitle {
+            font-family: var(--font-headline);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-secondary);
+            margin-top: var(--space-lg);
+            margin-bottom: var(--space-sm);
+        }
+
+        /* ─── Charts ─── */
+        .chart-container {
+            position: relative;
+            height: 220px;
+        }
+
+        .chart-title {
+            font-family: var(--font-headline);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: var(--space-md);
+        }
+
+        /* ─── Award ─── */
+        .award-card {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+
+        .award-icon {
+            width: 52px;
+            height: 52px;
+            background: rgba(234,179,8,.1);
+            border-radius: var(--radius-default);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            flex-shrink: 0;
+        }
+
+        .award-title {
+            font-family: var(--font-headline);
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .award-desc {
+            font-size: 14px;
+            color: var(--color-secondary);
+            margin-top: 4px;
+        }
+
+        /* ─── Contact footer ─── */
+        .contact {
+            background: var(--color-primary);
+            color: #fff;
+            padding: var(--space-3xl) var(--space-lg);
+            text-align: center;
+        }
+
+        .contact h2 {
+            font-family: var(--font-headline);
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: var(--space-md);
+        }
+
+        .contact p {
+            color: #94A3B8;
+            margin-bottom: var(--space-xl);
+        }
+
+        /* ─── Divider ─── */
+        .divider {
+            border: none;
+            border-top: 1px solid var(--color-border);
+        }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 640px) {
+            .hero h1 { font-size: 28px; }
+            .hero-sub { font-size: 16px; }
+            .two-col { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="badge">Web制作フリーランス</div>
+    <h1>近藤 快</h1>
+    <p class="hero-sub">
+        WordPressとShopifyを武器に、デザインから実装まで。<br>
+        「他の誰でもない」Webサイトを一緒に作ります。
+    </p>
+    <div class="cta-group">
+        <a href="https://x.com/konkai_web" target="_blank" class="btn btn-primary">X で話しかける</a>
+        <a href="mailto:konkai.info0303@gmail.com" class="btn btn-outline">メールで相談</a>
+    </div>
+</section>
+
+<!-- Stats bar -->
+<div class="stats-bar">
+    <div class="stats-grid">
+        <div>
+            <div class="stat-number">30+</div>
+            <div class="stat-label">制作実績</div>
+        </div>
+        <div>
+            <div class="stat-number">1.5+</div>
+            <div class="stat-label">フリーランス歴（年）</div>
+        </div>
+        <div>
+            <div class="stat-number">901</div>
+            <div class="stat-label">X フォロワー</div>
+        </div>
+        <div>
+            <div class="stat-number">21</div>
+            <div class="stat-label">年齢</div>
+        </div>
+    </div>
+</div>
+
+<!-- About + Skills -->
+<div class="section">
+    <div class="section-label">About</div>
+    <h2 class="section-title">こんかいって誰？</h2>
+    <div class="two-col">
+        <div class="card">
+            <div class="about-text">
+                <p>岡山県津山市在住の21歳。2020年からプログラミングを始め、今はWordPressとShopifyを軸にWeb制作フリーランスとして活動中。</p>
+                <p>デイトラコミュニティを中心に案件を受注し、LP・コーポレートHP・ECサイトなど30件以上の制作実績あり。</p>
+                <p>「みんなと同じことはしたくない」というのが根底の哲学。コーディングも提案も、ちょっと違う角度から攻めるのが好きです。</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="section-label">Skills</div>
+            <div class="skill-subtitle">メイン</div>
+            <div class="chips">
+                <span class="chip chip-active">WordPress</span>
+                <span class="chip chip-active">Shopify</span>
+                <span class="chip chip-active">HTML / CSS</span>
+            </div>
+            <div class="skill-subtitle">フロントエンド</div>
+            <div class="chips">
+                <span class="chip">SCSS</span>
+                <span class="chip">JavaScript</span>
+                <span class="chip">PHP</span>
+                <span class="chip">GSAP</span>
+                <span class="chip">Splide.js</span>
+            </div>
+            <div class="skill-subtitle">デザイン・その他</div>
+            <div class="chips">
+                <span class="chip">Figma</span>
+                <span class="chip">FLOCSS</span>
+                <span class="chip">SEO</span>
+                <span class="chip">Three.js（学習中）</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="divider">
+
+<!-- Charts -->
+<div class="section">
+    <div class="section-label">Stats</div>
+    <h2 class="section-title">制作実績の内訳</h2>
+    <div class="two-col">
+        <div class="card-elevated">
+            <div class="chart-title">案件ジャンル構成</div>
+            <div class="chart-container">
+                <canvas id="genreChart"></canvas>
+            </div>
+        </div>
+        <div class="card-elevated">
+            <div class="chart-title">技術スタック比率</div>
+            <div class="chart-container">
+                <canvas id="techChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="divider">
+
+<!-- Awards -->
+<div class="section">
+    <div class="section-label">Awards</div>
+    <h2 class="section-title">受賞歴</h2>
+    <div class="card award-card">
+        <div class="award-icon">🏆</div>
+        <div>
+            <div class="award-title">第2回実案件チャレンジ 優秀賞</div>
+            <div class="award-desc">デイトラ主催。実際のクライアント案件を通じたコーディングコンテスト。</div>
+        </div>
+    </div>
+</div>
+
+<!-- Contact -->
+<section class="contact">
+    <h2>一緒に作りませんか？</h2>
+    <p>LP・コーポレートサイト・ECサイト、何でもお気軽にご相談ください。</p>
+    <div class="cta-group">
+        <a href="https://x.com/konkai_web" target="_blank" class="btn btn-primary">X (@konkai_web)</a>
+        <a href="mailto:konkai.info0303@gmail.com" class="btn btn-outline">メールで相談</a>
+    </div>
+</section>
+
+<script>
+    const COLORS = {
+        navy:  '#0F172A',
+        sage:  '#059669',
+        slate: '#334155',
+        blue:  '#0EA5E9',
+        muted: '#E2E8F0',
+    };
+
+    const legendConfig = {
+        position: 'bottom',
+        labels: {
+            font: { family: 'DM Sans', size: 12 },
+            color: '#64748B',
+            padding: 12,
+            boxWidth: 10,
+            boxHeight: 10,
+        }
+    };
+
+    // 案件ジャンル
+    new Chart(document.getElementById('genreChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['LP', 'コーポレートHP', 'WordPress構築', 'Shopify', 'その他'],
+            datasets: [{
+                data: [35, 30, 20, 10, 5],
+                backgroundColor: [COLORS.navy, COLORS.sage, COLORS.slate, COLORS.blue, COLORS.muted],
+                borderWidth: 0,
+                hoverOffset: 6,
+            }]
+        },
+        options: {
+            cutout: '65%',
+            plugins: { legend: legendConfig },
+        }
+    });
+
+    // 技術スタック
+    new Chart(document.getElementById('techChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['WordPress', 'Shopify', 'HTML/CSS', 'JS / GSAP', 'その他'],
+            datasets: [{
+                data: [45, 20, 20, 10, 5],
+                backgroundColor: [COLORS.navy, COLORS.sage, COLORS.slate, COLORS.blue, COLORS.muted],
+                borderWidth: 0,
+                hoverOffset: 6,
+            }]
+        },
+        options: {
+            cutout: '65%',
+            plugins: { legend: legendConfig },
+        }
+    });
+</script>
+
+</body>
+</html>
