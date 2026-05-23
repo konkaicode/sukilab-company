@@ -500,10 +500,18 @@ function App() {
       }
     }
     setTasks((prev) => {
-      // ローカルのみのタスクを保持し、リモートタスクを置き換え
-      const localOnly = prev.filter((t) => !t.remote);
+      const remoteTitles = new Set(remoteTasks.map((t) => t.title));
+      // ローカルタスクのうち、すでに remote に同じタイトルがあるものは除去（楽観更新の dedup）
+      const localOnly = prev.filter((t) => !t.remote && !remoteTitles.has(t.title));
+      // アクティブだったタスクを保持するために、前回 active な remote タスクを覚えておく
+      const prevActiveTitle = prev.find((t) => t.active)?.title;
       const merged = [...remoteTasks, ...localOnly];
-      // アクティブなタスクがなくなったら先頭をアクティブに
+      if (prevActiveTitle) {
+        const restore = merged.find((t) => t.title === prevActiveTitle);
+        if (restore) {
+          merged.forEach((t) => { t.active = (t === restore); });
+        }
+      }
       if (!merged.some((t) => t.active) && merged[0]) merged[0].active = true;
       return merged;
     });
