@@ -1,0 +1,41 @@
+{
+  "templates": [
+    {
+      "id": "quick",
+      "name": "クイック",
+      "focus": 15,
+      "brk": 3,
+      "accent": "lemon"
+    },
+    {
+      "id": "classic",
+      "name": "クラシック",
+      "focus": 25,
+      "brk": 5,
+      "accent": "mint"
+    },
+    {
+      "id": "deep",
+      "name": "ディープワーク",
+      "focus": 50,
+      "brk": 10,
+      "accent": "lavender"
+    },
+    {
+      "id": "long",
+      "name": "ロングフォーカス",
+      "focus": 90,
+      "brk": 15,
+      "accent": "pink"
+    },
+    {
+      "id": "tpl-1779537457576",
+      "name": "1/1",
+      "focus": 1,
+      "brk": 1,
+      "accent": "mint",
+      "custom": true
+    }
+  ],
+  "activeId": "classic"
+}
