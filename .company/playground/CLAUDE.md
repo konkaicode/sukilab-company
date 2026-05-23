@@ -17,6 +17,22 @@
 |-------------|---------|------|------|
 | 自己紹介LP | `projects/my-lp/` | 進行中 | Verdana Health デザインシステムを使った1枚ペラLP |
 | X発信用画像生成 | `projects/x-image-generator/` | 運用中 | HTML + Playwright で X 投稿用図解画像を生成 |
+| Gummy Focus（ポモドーロ） | `projects/pomodoro-timer/` | 進行中 | Vite + React + PWA + Express。スキラボ秘書室と双方向連携するポモドーロアプリ |
+
+---
+
+## Gummy Focus（ポモドーロ）— 起動メモ
+
+ビルドが必要な初の playground プロジェクト。`npm run dev` で Vite + Express を同時起動。
+
+```
+cd .company/playground/projects/pomodoro-timer
+npm run dev
+# フロント: http://localhost:5173
+# API:     http://localhost:3001 (Vite が /api をプロキシ)
+```
+
+PWA としてスマホに「ホーム画面に追加」が可能。詳細は `pomodoro-timer/README.md` 参照。
 
 ---
 
