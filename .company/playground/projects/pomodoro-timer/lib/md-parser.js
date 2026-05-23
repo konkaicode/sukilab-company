@@ -200,6 +200,39 @@ export function toggleTaskInDoc(doc, id, date, { checked, text }) {
   return found;
 }
 
+/**
+ * メモ・振り返りセクション内の `[ポモドーロ] HH:MM 集中|休憩 NNmin[：ラベル]` を抽出。
+ * クロスデバイス同期の単一情報源として使う（端末ローカルの localStorage に依存しない）。
+ */
+export function parsePomodoroEntries(doc) {
+  const notes = doc.sections['メモ・振り返り'] || [];
+  const sessions = [];
+  let completed = 0;
+  let focusMinutes = 0;
+  for (const note of notes) {
+    if (note.kind !== 'note') continue;
+    // 例: "[ポモドーロ] 14:30 集中 25min：Design timer screen"
+    const m = note.text.match(/^\[ポモドーロ\]\s+(\d{1,2}:\d{2})\s+(集中|休憩)\s+(\d+)\s*min(?:\s*[：:]\s*(.*))?$/);
+    if (!m) continue;
+    const [, time, type, durStr, label] = m;
+    const dur = parseInt(durStr, 10);
+    const tone = type === '集中' ? 'mint' : (dur >= 10 ? 'lavender' : 'lemon');
+    if (type === '集中') {
+      completed++;
+      focusMinutes += dur;
+    }
+    // 新しい方が先頭になるよう unshift（ファイル上は古い順で並んでいる）
+    sessions.unshift({
+      time,
+      type,
+      task: (label && label.trim()) || (type === '休憩' ? 'ショート休憩' : '集中セッション'),
+      dur: `${dur}分`,
+      tone
+    });
+  }
+  return { sessions, completed, focusMinutes };
+}
+
 export function addSessionToDoc(doc, { type = 'focus', label = '', durationMin = 0, time }) {
   const timeStr = time || new Date().toLocaleTimeString('ja-JP', {
     hour: '2-digit', minute: '2-digit', hour12: false

@@ -83,12 +83,15 @@ export default function useTodos(date) {
         body: JSON.stringify({ type, label, durationMin })
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return await res.json();
+      const result = await res.json();
+      // 統計・履歴は MD の同じファイルから派生させているので、書き込み後は必ず再取得する
+      await refresh();
+      return result;
     } catch (err) {
       console.warn('[useTodos] logSession offline:', err.message);
       return null;
     }
-  }, [targetDate]);
+  }, [targetDate, refresh]);
 
   return { data, status, error, refresh, addTask, toggleTask, logSession, date: targetDate };
 }

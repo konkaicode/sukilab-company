@@ -9,6 +9,8 @@ import {
 } from './components/TweaksPanel.jsx';
 import useLocalStorage from './hooks/useLocalStorage.js';
 import useTodos from './hooks/useTodos.js';
+import useTemplates from './hooks/useTemplates.js';
+import { parsePomodoroEntries } from '../lib/md-parser.js';
 
 /* ============== Default tweaks (persisted) ============== */
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
@@ -421,39 +423,20 @@ function App() {
   const [modeDurations, setModeDurations] = useLocalStorage("gf_modeDurations", { focus: 25 * 60, short: 5 * 60, long: 15 * 60 });
   const [secsLeft, setSecsLeft] = useState(modeDurations.focus);
   const [running, setRunning] = useState(false);
-  // 完了ポモドーロは「日付つき」で保存し、日付が変わったらリセット
   const todayStr = (() => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   })();
-  const [completedRecord, setCompletedRecord] = useLocalStorage("gf_completed", { date: todayStr, count: 0 });
-  const completed = completedRecord.date === todayStr ? completedRecord.count : 0;
-  const setCompleted = (updater) => {
-    setCompletedRecord((prev) => {
-      const base = prev.date === todayStr ? prev.count : 0;
-      const next = typeof updater === 'function' ? updater(base) : updater;
-      return { date: todayStr, count: next };
-    });
-  };
 
   /* スキラボ秘書室との連携 */
   const todos = useTodos(todayStr);
 
-  /* 今日の集中時間（分） — 日付つきで保存し、日が変わったらリセット */
-  const [focusMinutesRecord, setFocusMinutesRecord] = useLocalStorage("gf_focusMinutes", { date: todayStr, minutes: 0 });
-  const focusMinutes = focusMinutesRecord.date === todayStr ? focusMinutesRecord.minutes : 0;
-  const addFocusMinutes = (mins) => {
-    setFocusMinutesRecord((prev) => {
-      const base = prev.date === todayStr ? prev.minutes : 0;
-      return { date: todayStr, minutes: base + mins };
-    });
-  };
-
-  /* セッション履歴 — 直近 20 件まで保持（日跨ぎでも残す） */
-  const [sessions, setSessions] = useLocalStorage("gf_sessions", []);
-  const addSession = (entry) => {
-    setSessions((prev) => [entry, ...prev].slice(0, 20));
-  };
+  /* 今日の統計・セッション履歴は MD ファイル（メモ・振り返り）から逆引きで派生させる。
+     これにより複数デバイスで同じ値を表示でき、localStorage の同期ズレが起きない。 */
+  const { sessions, completed, focusMinutes } = useMemo(() => {
+    if (!todos.data) return { sessions: [], completed: 0, focusMinutes: 0 };
+    return parsePomodoroEntries({ sections: todos.data.sections });
+  }, [todos.data]);
 
   /* 自動切替フラグ（タイマー終了時に次モードへ自動遷移＆自動開始） */
   const autoStartAfterModeChange = useRef(false);
@@ -462,14 +445,8 @@ function App() {
   const [swSecs, setSwSecs] = useState(0);
   const [swRunning, setSwRunning] = useState(false);
 
-  /* Templates — localStorage で永続化（カスタム追加分も保持） */
-  const [templates, setTemplates] = useLocalStorage("gf_templates", [
-    { id: "quick", name: "クイック", focus: 15, brk: 3, accent: "lemon" },
-    { id: "classic", name: "クラシック", focus: 25, brk: 5, accent: "mint" },
-    { id: "deep", name: "ディープワーク", focus: 50, brk: 10, accent: "lavender" },
-    { id: "long", name: "ロングフォーカス", focus: 90, brk: 15, accent: "pink" }
-  ]);
-  const [activeTpl, setActiveTpl] = useLocalStorage("gf_activeTpl", "classic");
+  /* Templates — GitHub JSON で全デバイス同期 */
+  const { templates, activeId: activeTpl, setTemplates, setActiveId: setActiveTpl } = useTemplates();
   const addTemplate = (tpl) => {
     const accents = ["mint", "lemon", "lavender", "pink"];
     const newTpl = {
@@ -536,24 +513,15 @@ function App() {
     });
   }, [todos.data]);
 
-  /* Timer tick */
+  /* Timer tick — セッション完了時は API 経由で MD に記録するだけ。
+     統計・履歴の表示は parsePomodoroEntries(todos.data) からの派生に統一。 */
   useEffect(() => {
     if (!running) return;
     const id = setInterval(() => {
       setSecsLeft((s) => {
         if (s <= 1) {
-          const nowTime = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', hour12: false });
           if (mode === "focus") {
             const focusMin = Math.round(modeDurations.focus / 60);
-            setCompleted((c) => c + 1);
-            addFocusMinutes(focusMin);
-            addSession({
-              time: nowTime,
-              type: "集中",
-              task: activeTask?.title || '集中セッション',
-              dur: `${focusMin}分`,
-              tone: "mint"
-            });
             todos.logSession({
               type: 'focus',
               label: activeTask?.title || '',
@@ -565,13 +533,6 @@ function App() {
           } else {
             const brkMin = Math.round(modeDurations[mode] / 60);
             const brkLabel = mode === 'short' ? 'ショート休憩' : 'ロング休憩';
-            addSession({
-              time: nowTime,
-              type: "休憩",
-              task: brkLabel,
-              dur: `${brkMin}分`,
-              tone: mode === 'short' ? 'lemon' : 'lavender'
-            });
             todos.logSession({
               type: 'break',
               label: brkLabel,

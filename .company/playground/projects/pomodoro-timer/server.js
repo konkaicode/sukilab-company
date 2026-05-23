@@ -26,6 +26,37 @@ const COMPANY_DIR =
   path.resolve(__dirname, '..', '..', '..');
 const TODOS_DIR = path.join(COMPANY_DIR, 'secretary', 'todos');
 const TEMPLATE_PATH = path.join(TODOS_DIR, '_template.md');
+const TEMPLATES_JSON_PATH = path.join(COMPANY_DIR, 'secretary', 'pomodoro-templates.json');
+
+const DEFAULT_TEMPLATES = [
+  { id: "quick", name: "クイック", focus: 15, brk: 3, accent: "lemon" },
+  { id: "classic", name: "クラシック", focus: 25, brk: 5, accent: "mint" },
+  { id: "deep", name: "ディープワーク", focus: 50, brk: 10, accent: "lavender" },
+  { id: "long", name: "ロングフォーカス", focus: 90, brk: 15, accent: "pink" }
+];
+
+async function readLocalTemplates() {
+  try {
+    const json = await fs.readFile(TEMPLATES_JSON_PATH, 'utf8');
+    const parsed = JSON.parse(json);
+    return {
+      templates: parsed.templates || DEFAULT_TEMPLATES,
+      activeId: parsed.activeId || 'classic'
+    };
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err;
+    return { templates: DEFAULT_TEMPLATES, activeId: 'classic' };
+  }
+}
+
+async function writeLocalTemplates({ templates, activeId }) {
+  await fs.mkdir(path.dirname(TEMPLATES_JSON_PATH), { recursive: true });
+  await fs.writeFile(
+    TEMPLATES_JSON_PATH,
+    JSON.stringify({ templates, activeId }, null, 2) + '\n',
+    'utf8'
+  );
+}
 
 const PORT = process.env.API_PORT || 3001;
 
@@ -118,6 +149,27 @@ app.post('/api/sessions/:date', async (req, res) => {
     const note = addSessionToDoc(doc, { type, label, durationMin, time });
     await writeLocalDoc(filePath, doc);
     res.json({ ok: true, note });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/templates', async (_req, res) => {
+  try {
+    const data = await readLocalTemplates();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/templates', async (req, res) => {
+  try {
+    const { templates, activeId } = req.body || {};
+    if (!Array.isArray(templates)) return res.status(400).json({ error: 'templates array required' });
+    const current = await readLocalTemplates();
+    await writeLocalTemplates({ templates, activeId: activeId || current.activeId });
+    res.json({ ok: true, templates, activeId: activeId || current.activeId });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
