@@ -439,18 +439,37 @@ function App() {
   /* スキラボ秘書室との連携 */
   const todos = useTodos(todayStr);
 
+  /* 今日の集中時間（分） — 日付つきで保存し、日が変わったらリセット */
+  const [focusMinutesRecord, setFocusMinutesRecord] = useLocalStorage("gf_focusMinutes", { date: todayStr, minutes: 0 });
+  const focusMinutes = focusMinutesRecord.date === todayStr ? focusMinutesRecord.minutes : 0;
+  const addFocusMinutes = (mins) => {
+    setFocusMinutesRecord((prev) => {
+      const base = prev.date === todayStr ? prev.minutes : 0;
+      return { date: todayStr, minutes: base + mins };
+    });
+  };
+
+  /* セッション履歴 — 直近 20 件まで保持（日跨ぎでも残す） */
+  const [sessions, setSessions] = useLocalStorage("gf_sessions", []);
+  const addSession = (entry) => {
+    setSessions((prev) => [entry, ...prev].slice(0, 20));
+  };
+
+  /* 自動切替フラグ（タイマー終了時に次モードへ自動遷移＆自動開始） */
+  const autoStartAfterModeChange = useRef(false);
+
   /* Stopwatch state */
   const [swSecs, setSwSecs] = useState(0);
   const [swRunning, setSwRunning] = useState(false);
 
-  /* Templates */
-  const [templates, setTemplates] = useState([
-  { id: "quick", name: "クイック", focus: 15, brk: 3, accent: "lemon" },
-  { id: "classic", name: "クラシック", focus: 25, brk: 5, accent: "mint" },
-  { id: "deep", name: "ディープワーク", focus: 50, brk: 10, accent: "lavender" },
-  { id: "long", name: "ロングフォーカス", focus: 90, brk: 15, accent: "pink" }]
-  );
-  const [activeTpl, setActiveTpl] = useState("classic");
+  /* Templates — localStorage で永続化（カスタム追加分も保持） */
+  const [templates, setTemplates] = useLocalStorage("gf_templates", [
+    { id: "quick", name: "クイック", focus: 15, brk: 3, accent: "lemon" },
+    { id: "classic", name: "クラシック", focus: 25, brk: 5, accent: "mint" },
+    { id: "deep", name: "ディープワーク", focus: 50, brk: 10, accent: "lavender" },
+    { id: "long", name: "ロングフォーカス", focus: 90, brk: 15, accent: "pink" }
+  ]);
+  const [activeTpl, setActiveTpl] = useLocalStorage("gf_activeTpl", "classic");
   const addTemplate = (tpl) => {
     const accents = ["mint", "lemon", "lavender", "pink"];
     const newTpl = {
@@ -523,21 +542,44 @@ function App() {
     const id = setInterval(() => {
       setSecsLeft((s) => {
         if (s <= 1) {
-          setRunning(false);
+          const nowTime = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', hour12: false });
           if (mode === "focus") {
+            const focusMin = Math.round(modeDurations.focus / 60);
             setCompleted((c) => c + 1);
-            // スキラボのメモ欄に「集中セッション完了」を追記
+            addFocusMinutes(focusMin);
+            addSession({
+              time: nowTime,
+              type: "集中",
+              task: activeTask?.title || '集中セッション',
+              dur: `${focusMin}分`,
+              tone: "mint"
+            });
             todos.logSession({
               type: 'focus',
               label: activeTask?.title || '',
-              durationMin: Math.round(modeDurations.focus / 60)
+              durationMin: focusMin
             });
+            // フォーカス完了 → 自動でショート休憩へ遷移＆開始
+            autoStartAfterModeChange.current = true;
+            setMode("short");
           } else {
+            const brkMin = Math.round(modeDurations[mode] / 60);
+            const brkLabel = mode === 'short' ? 'ショート休憩' : 'ロング休憩';
+            addSession({
+              time: nowTime,
+              type: "休憩",
+              task: brkLabel,
+              dur: `${brkMin}分`,
+              tone: mode === 'short' ? 'lemon' : 'lavender'
+            });
             todos.logSession({
               type: 'break',
-              label: mode === 'short' ? 'ショート休憩' : 'ロング休憩',
-              durationMin: Math.round(modeDurations[mode] / 60)
+              label: brkLabel,
+              durationMin: brkMin
             });
+            // 休憩終了 → フォーカスに戻すが、自動開始はしない（休憩を伸ばしたい場合のため）
+            setRunning(false);
+            setMode("focus");
           }
           return 0;
         }
@@ -556,7 +598,12 @@ function App() {
   /* Switching mode resets to that mode's duration */
   useEffect(() => {
     setSecsLeft(modeDurations[mode]);
-    setRunning(false);
+    if (autoStartAfterModeChange.current) {
+      autoStartAfterModeChange.current = false;
+      setRunning(true);   // フォーカス→休憩などの自動切替時はそのままタイマー継続
+    } else {
+      setRunning(false);
+    }
   }, [mode]);
 
   const totalForMode = modeDurations[mode];
@@ -580,17 +627,6 @@ function App() {
     }
   };
   const selectTask = (id) => setTasks(tasks.map((t) => ({ ...t, active: t.id === id })));
-
-  /* Sessions */
-  const sessions = [
-  { time: "09:30", type: "集中", task: "タイマー画面のデザイン", dur: "25分", tone: "mint" },
-  { time: "09:55", type: "休憩", task: "ショート休憩", dur: "5分", tone: "lemon" },
-  { time: "10:00", type: "集中", task: "タイマー画面のデザイン", dur: "25分", tone: "mint" },
-  { time: "10:25", type: "休憩", task: "ショート休憩", dur: "5分", tone: "lemon" },
-  { time: "10:30", type: "集中", task: "Figmaレイアウトのレビュー", dur: "25分", tone: "mint" },
-  { time: "10:55", type: "休憩", task: "ロング休憩", dur: "15分", tone: "lavender" },
-  { time: "11:10", type: "集中", task: "ランディングページのコピー", dur: "25分", tone: "mint" }];
-
 
   const treeStage = Math.min(4, Math.floor(completed / 1.5));
   const nextProgress = completed % 2 / 2 + 0.2;
@@ -664,9 +700,9 @@ function App() {
             stage={treeStage}
             progress={nextProgress}
             completed={completed}
-            focusMinutes={completed * 25} />
+            focusMinutes={focusMinutes} />
           
-          <StatsGrid completed={completed} focusMinutes={completed * 25} />
+          <StatsGrid completed={completed} focusMinutes={focusMinutes} />
         </section>
       </main>
 
@@ -1461,8 +1497,21 @@ function HistoryCard({ sessions, tab }) {
     <div className="gummy-card card-history" data-mob="stats" style={{ padding: 22 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
         <h3 style={cardStyles.h3}>最近のセッション</h3>
-        <span style={cardStyles.count}>直近 7 件 · 今日</span>
+        <span style={cardStyles.count}>直近 {sessions.length} 件</span>
       </div>
+      {sessions.length === 0 && (
+        <div style={{
+          padding: "16px 18px",
+          borderRadius: 18,
+          background: "rgba(255,255,255,0.55)",
+          color: "var(--ink-mute)",
+          fontSize: 13,
+          fontWeight: 700,
+          textAlign: "center"
+        }}>
+          まだセッションがありません。タイマーを 1 回回すとここに記録されます。
+        </div>
+      )}
       <div style={{
         display: "flex",
         gap: 10,
