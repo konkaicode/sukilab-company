@@ -1,6 +1,6 @@
 /* Gummy Focus — main app */
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import FocusTree from './components/FocusTree.jsx';
 import {
   useTweaks, TweaksPanel, TweakSection, TweakRow,
@@ -10,6 +10,7 @@ import {
 import useLocalStorage from './hooks/useLocalStorage.js';
 import useTodos from './hooks/useTodos.js';
 import useTemplates from './hooks/useTemplates.js';
+import StatsView from './components/StatsView.jsx';
 import { parsePomodoroEntries } from '../lib/md-parser.js';
 
 /* ============== Default tweaks (persisted) ============== */
@@ -160,7 +161,7 @@ const I = {
 };
 
 /* ============== Header ============== */
-function Header({ tab, setTab }) {
+function Header({ tab, setTab, onSync, syncState }) {
   return (
     <header className="app-header" style={hStyles.wrap}>
       <div className="app-brand" style={hStyles.brand}>
@@ -179,21 +180,41 @@ function Header({ tab, setTab }) {
           <button
             className={`tab-btn ${tab === "pomo" ? "tab-btn--active" : ""}`}
             onClick={() => setTab("pomo")}>
-            
             <I.Tree style={{ marginRight: 6, opacity: 0.85 }} />
             ポモドーロ
           </button>
           <button
             className={`tab-btn ${tab === "stop" ? "tab-btn--active" : ""}`}
             onClick={() => setTab("stop")}>
-            
             <I.Clock style={{ marginRight: 6, opacity: 0.85 }} />
             ストップウォッチ
+          </button>
+          <button
+            className={`tab-btn ${tab === "stats" ? "tab-btn--active" : ""}`}
+            onClick={() => setTab("stats")}>
+            <I.Chart style={{ marginRight: 6, opacity: 0.85 }} />
+            記録
           </button>
         </div>
       </div>
 
       <div className="app-actions" style={hStyles.actions}>
+        <button
+          className="icon-btn sync-btn"
+          title={syncState === 'loading' ? '同期中…' : syncState === 'done' ? '同期完了' : '同期'}
+          onClick={onSync}
+          disabled={syncState === 'loading'}
+          style={{
+            position: 'relative',
+            transition: 'transform 0.2s ease'
+          }}>
+          {syncState === 'done' ? <I.Check /> : (
+            <span style={{
+              display: 'inline-flex',
+              animation: syncState === 'loading' ? 'gf-spin 0.9s linear infinite' : 'none'
+            }}><I.Reset /></span>
+          )}
+        </button>
         <button className="icon-btn" title="Theme"><I.Sun /></button>
         <button className="icon-btn" title="Settings"><I.Settings /></button>
         <div className="app-avatar" style={hStyles.avatar}>M</div>
@@ -417,10 +438,10 @@ function App() {
   const [mobileSection, setMobileSection] = useState("pomo");
   const onMobileNav = (s) => {
     setMobileSection(s);
-    if (s === "pomo" || s === "stop") setTab(s);
+    if (s === "pomo" || s === "stop" || s === "stats") setTab(s);
   };
-  const [mode, setMode] = useState("focus"); // focus | short | long
-  const [modeDurations, setModeDurations] = useLocalStorage("gf_modeDurations", { focus: 25 * 60, short: 5 * 60, long: 15 * 60 });
+  const [mode, setMode] = useState("focus"); // focus | break
+  const [modeDurations, setModeDurations] = useLocalStorage("gf_modeDurations", { focus: 25 * 60, break: 5 * 60 });
   const [secsLeft, setSecsLeft] = useState(modeDurations.focus);
   const [running, setRunning] = useState(false);
   const todayStr = (() => {
@@ -433,8 +454,8 @@ function App() {
 
   /* 今日の統計・セッション履歴は MD ファイル（メモ・振り返り）から逆引きで派生させる。
      これにより複数デバイスで同じ値を表示でき、localStorage の同期ズレが起きない。 */
-  const { sessions, completed, focusMinutes } = useMemo(() => {
-    if (!todos.data) return { sessions: [], completed: 0, focusMinutes: 0 };
+  const { sessions, completed, focusMinutes, stopwatchMinutes, stopwatchLongest } = useMemo(() => {
+    if (!todos.data) return { sessions: [], completed: 0, focusMinutes: 0, stopwatchMinutes: 0, stopwatchLongest: 0 };
     return parsePomodoroEntries({ sections: todos.data.sections });
   }, [todos.data]);
 
@@ -446,7 +467,36 @@ function App() {
   const [swRunning, setSwRunning] = useState(false);
 
   /* Templates — GitHub JSON で全デバイス同期 */
-  const { templates, activeId: activeTpl, setTemplates, setActiveId: setActiveTpl } = useTemplates();
+  const { templates, activeId: activeTpl, setTemplates, setActiveId: setActiveTpl, refresh: refreshTemplates } = useTemplates();
+
+  /* 手動同期ボタンの状態 */
+  const [syncState, setSyncState] = useState('idle'); // idle | loading | done
+  const handleSync = useCallback(async () => {
+    setSyncState('loading');
+    try {
+      await Promise.all([todos.refresh(), refreshTemplates()]);
+      setSyncState('done');
+      setTimeout(() => setSyncState('idle'), 800);
+    } catch {
+      setSyncState('idle');
+    }
+  }, [todos, refreshTemplates]);
+
+  /* PWA からフォアグラウンドに戻ったら自動同期（60秒以上経過していたら） */
+  const lastSyncAt = useRef(Date.now());
+  useEffect(() => {
+    const onVis = () => {
+      if (document.visibilityState === 'visible') {
+        const elapsed = Date.now() - lastSyncAt.current;
+        if (elapsed > 60_000) {
+          lastSyncAt.current = Date.now();
+          handleSync();
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, [handleSync]);
   const addTemplate = (tpl) => {
     const accents = ["mint", "lemon", "lavender", "pink"];
     const newTpl = {
@@ -459,7 +509,7 @@ function App() {
     };
     setTemplates([...templates, newTpl]);
     setActiveTpl(newTpl.id);
-    const newDur = { focus: newTpl.focus * 60, short: newTpl.brk * 60, long: newTpl.brk * 3 * 60 };
+    const newDur = { focus: newTpl.focus * 60, break: newTpl.brk * 60 };
     setModeDurations(newDur);
     setMode("focus");
     setSecsLeft(newDur.focus);
@@ -481,7 +531,7 @@ function App() {
   useEffect(() => {
     if (!todos.data) return;
     const remoteTasks = [];
-    for (const sec of ['最優先', '通常', '余裕があれば']) {
+    for (const sec of ['最優先', '通常', '余裕があれば', '完了']) {
       for (const t of todos.data.sections[sec] || []) {
         if (t.kind !== 'task') continue;
         remoteTasks.push({
@@ -491,7 +541,9 @@ function App() {
           active: false,
           remote: true,
           remoteId: t.id,
-          section: sec
+          section: sec === '完了' ? '通常' : sec,
+          genre: t.genre || null,
+          priority: t.priority || null
         });
       }
     }
@@ -527,19 +579,17 @@ function App() {
               label: activeTask?.title || '',
               durationMin: focusMin
             });
-            // フォーカス完了 → 自動でショート休憩へ遷移＆開始
             autoStartAfterModeChange.current = true;
-            setMode("short");
+            setMode("break");
           } else {
-            const brkMin = Math.round(modeDurations[mode] / 60);
-            const brkLabel = mode === 'short' ? 'ショート休憩' : 'ロング休憩';
+            const brkMin = Math.round(modeDurations.break / 60);
             todos.logSession({
               type: 'break',
-              label: brkLabel,
+              label: '休憩',
               durationMin: brkMin
             });
-            // 休憩終了 → フォーカスに戻すが、自動開始はしない（休憩を伸ばしたい場合のため）
-            setRunning(false);
+            // 休憩終了 → フォーカスへ戻して自動開始（止めるまで永遠ループ）
+            autoStartAfterModeChange.current = true;
             setMode("focus");
           }
           return 0;
@@ -570,14 +620,34 @@ function App() {
   const totalForMode = modeDurations[mode];
   const progress = (totalForMode - secsLeft) / totalForMode;
 
+  const [addOptions, setAddOptions] = useState({
+    section: '通常',
+    genre: '個人',
+    dateMode: (() => {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    })(),
+    customDate: null
+  });
+
   const addTask = () => {
     const v = newTask.trim();
     if (!v) return;
-    // ローカル即時反映
-    setTasks([...tasks, { id: Date.now(), title: v, done: false, active: false }]);
+    const targetDate = addOptions.dateMode === 'custom'
+      ? addOptions.customDate
+      : addOptions.dateMode;
+    const isToday = targetDate === todayStr;
+    // 今日のタスクの場合はローカルにも即時反映
+    if (isToday) {
+      setTasks([...tasks, { id: Date.now(), title: v, done: false, active: false, section: addOptions.section, genre: addOptions.genre }]);
+    }
     setNewTask("");
-    // スキラボ todos にも書き込み（非同期、失敗しても無視）
-    todos.addTask(v, { section: '通常', priority: '通常' });
+    todos.addTask(v, {
+      section: addOptions.section,
+      priority: addOptions.section === '最優先' ? '高' : '通常',
+      genre: addOptions.genre,
+      date: targetDate
+    });
   };
   const toggleDone = (id) => {
     const target = tasks.find((t) => t.id === id);
@@ -589,13 +659,29 @@ function App() {
   };
   const selectTask = (id) => setTasks(tasks.map((t) => ({ ...t, active: t.id === id })));
 
-  const treeStage = Math.min(4, Math.floor(completed / 1.5));
-  const nextProgress = completed % 2 / 2 + 0.2;
+  const handleEditTask = useCallback((remoteId, patch) => {
+    return todos.editTask(remoteId, patch);
+  }, [todos]);
+
+  const handleDeleteTask = useCallback((remoteId) => {
+    setTasks((prev) => prev.filter((t) => t.remoteId !== remoteId));
+    return todos.deleteTask(remoteId);
+  }, [todos]);
+
+  const MINUTES_PER_STAGE = 120;
+  const treeStage = Math.min(4, Math.floor(focusMinutes / MINUTES_PER_STAGE));
+  const stageProgressMin = focusMinutes - treeStage * MINUTES_PER_STAGE;
+  const nextProgress = treeStage >= 4 ? 1 : stageProgressMin / MINUTES_PER_STAGE;
 
   return (
     <div style={{ position: "relative", zIndex: 1, minHeight: "100vh", paddingBottom: 36 }} data-mobile-section={mobileSection}>
-      <Header tab={tab} setTab={setTab} />
+      <Header tab={tab} setTab={setTab} onSync={handleSync} syncState={syncState} />
 
+      {tab === "stats" ? (
+        <main className="app-stats" style={appStyles.statsWrap}>
+          <StatsView />
+        </main>
+      ) : (
       <main className="app-grid" data-mobile-section={mobileSection} style={appStyles.grid}>
         {/* LEFT COLUMN */}
         <section style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -605,8 +691,12 @@ function App() {
             setNewTask={setNewTask}
             addTask={addTask}
             toggleDone={toggleDone}
-            selectTask={selectTask} />
-          
+            selectTask={selectTask}
+            editTask={handleEditTask}
+            deleteTask={handleDeleteTask}
+            addOptions={addOptions}
+            setAddOptions={setAddOptions} />
+
           <TemplatesCard
             templates={templates}
             active={activeTpl}
@@ -616,7 +706,7 @@ function App() {
               setActiveTpl(id);
               const tpl = templates.find((t) => t.id === id);
               if (tpl) {
-                const newDur = { focus: tpl.focus * 60, short: tpl.brk * 60, long: tpl.brk * 3 * 60 };
+                const newDur = { focus: tpl.focus * 60, break: tpl.brk * 60 };
                 setModeDurations(newDur);
                 setMode("focus");
                 setSecsLeft(newDur.focus);
@@ -645,11 +735,24 @@ function App() {
           <StopwatchPanel
             secs={swSecs}
             running={swRunning}
-            setRunning={setSwRunning}
+            setRunning={(v) => {
+              // 停止時、60秒以上計測していたらセッションログを残す
+              if (swRunning && !v && swSecs >= 60) {
+                const durMin = Math.round(swSecs / 60);
+                todos.logSession({
+                  type: 'stopwatch',
+                  label: activeTask?.title || '',
+                  durationMin: durMin
+                });
+              }
+              setSwRunning(v);
+            }}
             reset={() => {setSwSecs(0);setSwRunning(false);}}
             gradient={gradient}
             digitStyleKey={tweaks.stopDigitStyle}
-            activeTask={activeTask} />
+            activeTask={activeTask}
+            todayTotalMin={stopwatchMinutes}
+            longestMin={stopwatchLongest} />
 
           }
           {tweaks.showHistory && <HistoryCard sessions={sessions} tab={tab} />}
@@ -666,6 +769,7 @@ function App() {
           <StatsGrid completed={completed} focusMinutes={focusMinutes} />
         </section>
       </main>
+      )}
 
       <BottomNav active={mobileSection} setActive={onMobileNav} />
 
@@ -744,29 +848,26 @@ function PomodoroPanel({ mode, setMode, secsLeft, progress, running, setRunning,
   const ringStroke = vw < 768 ? 24 : 28;
   return (
     <div className="gummy-card pomo-panel card-pomo" data-mob="pomo" style={{ padding: "32px 32px 36px", position: "relative" }}>
-      {/* mode chips */}
-      <div className="mode-chips" style={{ display: "flex", justifyContent: "center", gap: 10, marginBottom: 18 }}>
-        {[
-        { id: "focus", label: "集中" },
-        { id: "short", label: "ショート休憩" },
-        { id: "long", label: "ロング休憩" }].
-        map((m) =>
-        <button
-          key={m.id}
-          className={`gummy-chip ${mode === m.id ? "gummy-chip--active" : ""}`}
-          onClick={() => setMode(m.id)}
-          style={{ fontSize: 13 }}>
-          
-            {m.label}
-          </button>
-        )}
+      {/* mode status badge (read-only, auto-cycles focus ⇄ break) */}
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
+        <div style={{
+          fontSize: 12, fontWeight: 800, letterSpacing: "0.08em",
+          padding: "6px 14px", borderRadius: 999,
+          background: mode === "focus"
+            ? "linear-gradient(180deg, #e9f9ef 0%, #d4f1e5 100%)"
+            : "linear-gradient(180deg, #fff3da 0%, #ffe2b8 100%)",
+          color: mode === "focus" ? "#0f5a48" : "#7a5b16",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 4px -2px rgba(31,39,72,0.18)"
+        }}>
+          {mode === "focus" ? "集中中" : "休憩中"}
+        </div>
       </div>
 
       {/* ring + time */}
       <div style={{ display: "flex", justifyContent: "center", marginTop: 8, marginBottom: 24 }}>
         <TimerRing progress={progress} gradient={gradient} size={ringSize} strokeWidth={ringStroke}>
           <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-mute)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 6 }}>
-            {mode === "focus" ? "集中タイム" : mode === "short" ? "ショート休憩" : "ロング休憩"}
+            {mode === "focus" ? "集中タイム" : "休憩中"}
           </div>
           <div className="mono-num pomo-digits" style={{
             fontFamily: "var(--font-num)",
@@ -841,7 +942,7 @@ function PomodoroPanel({ mode, setMode, secsLeft, progress, running, setRunning,
 
 }
 
-function StopwatchPanel({ secs, running, setRunning, reset, gradient, activeTask, digitStyleKey }) {
+function StopwatchPanel({ secs, running, setRunning, reset, gradient, activeTask, digitStyleKey, todayTotalMin = 0, longestMin = 0 }) {
   const digitStyle = getStopDigitStyle(digitStyleKey, gradient);
   return (
     <div className="gummy-card stop-panel card-stop" data-mob="stop" style={{ padding: "40px 32px 36px", position: "relative" }}>
@@ -904,119 +1005,354 @@ function StopwatchPanel({ secs, running, setRunning, reset, gradient, activeTask
         display: "flex", justifyContent: "space-between"
       }}>
         <div style={{ fontSize: 13, color: "var(--ink-soft)", fontWeight: 700 }}>
-          今日の合計 <span style={{ color: "var(--ink)", fontWeight: 800, marginLeft: 4 }}>2時間18分</span>
+          今日の合計 <span style={{ color: "var(--ink)", fontWeight: 800, marginLeft: 4 }}>
+            {todayTotalMin >= 60 ? `${Math.floor(todayTotalMin / 60)}時間${todayTotalMin % 60}分` : `${todayTotalMin}分`}
+          </span>
         </div>
         <div style={{ fontSize: 13, color: "var(--ink-mute)", fontWeight: 700 }}>
-          最長記録 <span style={{ color: "var(--ink)", fontWeight: 800, marginLeft: 4 }}>52分</span>
+          最長記録 <span style={{ color: "var(--ink)", fontWeight: 800, marginLeft: 4 }}>
+            {longestMin >= 60 ? `${Math.floor(longestMin / 60)}時間${longestMin % 60}分` : `${longestMin}分`}
+          </span>
         </div>
       </div>
     </div>);
 
 }
 
-function TasksCard({ tasks, newTask, setNewTask, addTask, toggleDone, selectTask }) {
+const SECTION_ORDER = ['最優先', '通常', '余裕があれば'];
+const SECTION_STYLES = {
+  '最優先': { dot: '#ff7a8a', label: '#7a2c44' },
+  '通常': { dot: '#5fbf90', label: '#0f5a48' },
+  '余裕があれば': { dot: '#cdbcff', label: '#3e2a82' }
+};
+
+function TasksCard({ tasks, newTask, setNewTask, addTask, toggleDone, selectTask, editTask, deleteTask, addOptions, setAddOptions }) {
+  // セクション別に分類（remote タスクのみ。ローカルのみのタスクは「通常」に集約）
+  const grouped = useMemo(() => {
+    const g = { '最優先': [], '通常': [], '余裕があれば': [] };
+    for (const t of tasks) {
+      if (t.done) continue;
+      const sec = SECTION_ORDER.includes(t.section) ? t.section : '通常';
+      g[sec].push(t);
+    }
+    return g;
+  }, [tasks]);
+
+  const doneTasks = useMemo(() => tasks.filter((t) => t.done), [tasks]);
+  const undoneCount = tasks.filter((t) => !t.done).length;
+
+  // 日付プリセット
+  const dateOptions = useMemo(() => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return [
+      { value: iso(today), label: '今日' },
+      { value: iso(tomorrow), label: '明日' },
+      { value: 'custom', label: 'カスタム' }
+    ];
+  }, []);
+
   return (
     <div className="gummy-card card-tasks" data-mob="tasks" style={{ padding: 22 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
-        <h3 style={cardStyles.h3}>今日のタスク</h3>
-        <span style={cardStyles.count}>未完了 {tasks.filter((t) => !t.done).length} 件</span>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12 }}>
+        <h3 style={cardStyles.h3}>タスク</h3>
+        <span style={cardStyles.count}>未完了 {undoneCount} 件</span>
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+      {/* 追加フォーム */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
         <div style={cardStyles.inputWrap}>
           <input
             value={newTask}
             onChange={(e) => setNewTask(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addTask()}
-            placeholder="今日は何に集中しますか？"
+            placeholder="何に集中しますか？"
             style={cardStyles.input} />
-          
         </div>
         <button
           className="gummy-btn gummy-btn--primary"
           onClick={addTask}
           style={{ padding: "10px 16px", fontSize: 14 }}>
-          
           <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
             <I.Plus /> 追加
           </span>
         </button>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {tasks.map((task) =>
-        <TaskRow key={task.id} task={task} toggleDone={toggleDone} selectTask={selectTask} />
+      {/* オプション行 */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }}>
+        <PillSelect
+          value={addOptions.section}
+          onChange={(v) => setAddOptions({ ...addOptions, section: v })}
+          options={SECTION_ORDER.map((s) => ({ value: s, label: s }))}
+        />
+        <PillSelect
+          value={addOptions.genre}
+          onChange={(v) => setAddOptions({ ...addOptions, genre: v })}
+          options={[
+            { value: '仕事', label: '仕事' },
+            { value: '個人', label: '個人' }
+          ]}
+        />
+        <PillSelect
+          value={addOptions.dateMode}
+          onChange={(v) => {
+            if (v === 'custom') {
+              const input = window.prompt('日付を入力 (YYYY-MM-DD)', addOptions.customDate || dateOptions[0].value);
+              if (input && /^\d{4}-\d{2}-\d{2}$/.test(input)) {
+                setAddOptions({ ...addOptions, dateMode: 'custom', customDate: input });
+              }
+            } else {
+              setAddOptions({ ...addOptions, dateMode: v });
+            }
+          }}
+          options={dateOptions}
+        />
+        {addOptions.dateMode === 'custom' && addOptions.customDate && (
+          <span style={{ fontSize: 11, color: 'var(--ink-mute)', alignSelf: 'center' }}>
+            → {addOptions.customDate}
+          </span>
+        )}
+      </div>
+
+      {/* セクション別表示 */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        {SECTION_ORDER.map((sec) => {
+          const items = grouped[sec];
+          if (!items.length) return null;
+          const st = SECTION_STYLES[sec];
+          return (
+            <div key={sec}>
+              <div style={{
+                display: "flex", alignItems: "center", gap: 6, marginBottom: 6,
+                fontSize: 11, fontWeight: 800, letterSpacing: '0.04em', color: st.label
+              }}>
+                <span style={{ width: 6, height: 6, borderRadius: 999, background: st.dot }} />
+                {sec}
+                <span style={{ color: 'var(--ink-mute)', fontWeight: 700, marginLeft: 4 }}>
+                  {items.length}
+                </span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {items.map((task) =>
+                  <TaskRow key={task.id}
+                    task={task}
+                    toggleDone={toggleDone}
+                    selectTask={selectTask}
+                    editTask={editTask}
+                    deleteTask={deleteTask}
+                  />
+                )}
+              </div>
+            </div>
+          );
+        })}
+
+        {doneTasks.length > 0 && (
+          <details style={{ marginTop: 4 }}>
+            <summary style={{
+              fontSize: 11, fontWeight: 800, color: 'var(--ink-mute)', cursor: 'pointer', letterSpacing: '0.04em'
+            }}>
+              完了済み {doneTasks.length} 件
+            </summary>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 6 }}>
+              {doneTasks.map((task) =>
+                <TaskRow key={task.id}
+                  task={task}
+                  toggleDone={toggleDone}
+                  selectTask={selectTask}
+                  editTask={editTask}
+                  deleteTask={deleteTask}
+                />
+              )}
+            </div>
+          </details>
         )}
       </div>
     </div>);
-
 }
 
-function TaskRow({ task, toggleDone, selectTask }) {
+function PillSelect({ value, onChange, options }) {
+  return (
+    <div style={{
+      display: 'inline-flex',
+      padding: 3,
+      borderRadius: 999,
+      background: 'rgba(255,255,255,0.65)',
+      boxShadow: 'inset 0 1px 2px rgba(31,39,72,0.06)'
+    }}>
+      {options.map((o) => {
+        const active = o.value === value;
+        return (
+          <button
+            key={o.value}
+            type="button"
+            onClick={() => onChange(o.value)}
+            style={{
+              border: 'none',
+              cursor: 'pointer',
+              padding: '5px 10px',
+              borderRadius: 999,
+              fontSize: 11,
+              fontWeight: 800,
+              background: active
+                ? 'linear-gradient(180deg, #d9f5e6 0%, #a9e3c9 100%)'
+                : 'transparent',
+              color: active ? '#0f5a48' : 'var(--ink-soft)',
+              boxShadow: active
+                ? 'inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 4px -2px rgba(80,180,140,0.3)'
+                : 'none'
+            }}>
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function TaskRow({ task, toggleDone, selectTask, editTask, deleteTask }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(task.title);
+
+  useEffect(() => { setDraft(task.title); }, [task.title]);
+
+  const commit = () => {
+    const v = draft.trim();
+    if (v && v !== task.title && task.remote && task.remoteId && editTask) {
+      editTask(task.remoteId, { text: v });
+    }
+    setEditing(false);
+  };
+
+  const genreBadge = task.genre === '仕事'
+    ? { bg: '#ffe2d6', txt: '#7a3520', label: '仕事' }
+    : task.genre === '個人'
+    ? { bg: '#e9e0ff', txt: '#3e2a82', label: '個人' }
+    : null;
+
   return (
     <div
-      onClick={() => selectTask(task.id)}
+      onClick={() => !editing && selectTask(task.id)}
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 12,
-        padding: "12px 14px",
-        borderRadius: 18,
-        background: task.active ?
-        "linear-gradient(180deg, #e9f9ef 0%, #d4f1e5 100%)" :
-        "rgba(255,255,255,0.45)",
-        boxShadow: task.active ?
-        "inset 0 2px 0 rgba(255,255,255,0.9), inset 0 -2px 0 rgba(80,160,120,0.15), 0 4px 8px -4px rgba(80,180,140,0.30)" :
-        "inset 0 1px 0 rgba(255,255,255,0.7)",
-        cursor: "pointer",
+        gap: 10,
+        padding: "10px 12px",
+        borderRadius: 16,
+        background: task.active
+          ? "linear-gradient(180deg, #e9f9ef 0%, #d4f1e5 100%)"
+          : "rgba(255,255,255,0.45)",
+        boxShadow: task.active
+          ? "inset 0 2px 0 rgba(255,255,255,0.9), inset 0 -2px 0 rgba(80,160,120,0.15), 0 4px 8px -4px rgba(80,180,140,0.30)"
+          : "inset 0 1px 0 rgba(255,255,255,0.7)",
+        cursor: editing ? "default" : "pointer",
         transition: "transform 0.15s ease"
       }}>
-      
       <button
-        onClick={(e) => {e.stopPropagation();toggleDone(task.id);}}
+        onClick={(e) => { e.stopPropagation(); toggleDone(task.id); }}
         style={{
-          width: 22, height: 22, borderRadius: 8,
-          background: task.done ?
-          "linear-gradient(180deg, #d9f5e6 0%, #a9e3c9 50%, #8fd0e7 100%)" :
-          "rgba(255,255,255,0.9)",
-          boxShadow: task.done ?
-          "inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -2px 0 rgba(54,128,160,0.18), 0 3px 6px -2px rgba(80,180,180,0.4)" :
-          "inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -2px 0 rgba(31,39,72,0.06), 0 2px 4px -2px rgba(31,39,72,0.15)",
+          width: 20, height: 20, borderRadius: 7,
+          background: task.done
+            ? "linear-gradient(180deg, #d9f5e6 0%, #a9e3c9 50%, #8fd0e7 100%)"
+            : "rgba(255,255,255,0.9)",
+          boxShadow: task.done
+            ? "inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -2px 0 rgba(54,128,160,0.18), 0 3px 6px -2px rgba(80,180,180,0.4)"
+            : "inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -2px 0 rgba(31,39,72,0.06), 0 2px 4px -2px rgba(31,39,72,0.15)",
           border: "none",
           cursor: "pointer",
           display: "grid", placeItems: "center",
           color: "#103848",
           flexShrink: 0
         }}>
-        
         {task.done && <I.Check />}
       </button>
+
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{
-          fontWeight: 700, fontSize: 14,
-          color: task.done ? "var(--ink-mute)" : "var(--ink)",
-          textDecoration: task.done ? "line-through" : "none",
-          textDecorationColor: "rgba(31,39,72,0.3)",
-          textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap"
-        }}>
-          {task.title}
+        {editing ? (
+          <input
+            autoFocus
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={commit}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') { e.target.blur(); }
+              else if (e.key === 'Escape') { setDraft(task.title); setEditing(false); }
+            }}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              border: 'none', outline: 'none', background: 'rgba(255,255,255,0.85)',
+              borderRadius: 8, padding: '4px 8px',
+              fontFamily: 'var(--font-body)',
+              fontSize: 13, fontWeight: 700, color: 'var(--ink)',
+              boxShadow: 'inset 0 1px 2px rgba(31,39,72,0.08)'
+            }} />
+        ) : (
+          <div style={{
+            fontWeight: 700, fontSize: 13,
+            color: task.done ? "var(--ink-mute)" : "var(--ink)",
+            textDecoration: task.done ? "line-through" : "none",
+            textDecorationColor: "rgba(31,39,72,0.3)",
+            textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap"
+          }}>
+            {task.title}
+          </div>
+        )}
+      </div>
+
+      {genreBadge && !editing && (
+        <span style={{
+          fontSize: 9, fontWeight: 800, letterSpacing: "0.04em",
+          padding: "2px 7px", borderRadius: 999,
+          background: genreBadge.bg, color: genreBadge.txt,
+          flexShrink: 0
+        }}>{genreBadge.label}</span>
+      )}
+
+      {task.active && !editing && (
+        <span style={{
+          fontSize: 9, fontWeight: 800, letterSpacing: "0.04em",
+          color: "#0f6a4e",
+          padding: "2px 7px",
+          borderRadius: 999,
+          background: "rgba(255,255,255,0.7)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 4px -2px rgba(80,180,140,0.4)",
+          flexShrink: 0
+        }}>選択中</span>
+      )}
+
+      {task.remote && !editing && (
+        <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+          <button
+            onClick={(e) => { e.stopPropagation(); setEditing(true); }}
+            title="編集"
+            style={iconBtnSm}>✎</button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (window.confirm(`「${task.title}」を削除しますか？`) && deleteTask) {
+                deleteTask(task.remoteId);
+              }
+            }}
+            title="削除"
+            style={iconBtnSm}>×</button>
         </div>
-      </div>
-      {task.active &&
-      <div style={{
-        fontSize: 10, fontWeight: 800, letterSpacing: "0.08em",
-        color: "#0f6a4e",
-        padding: "4px 10px",
-        borderRadius: 999,
-        background: "rgba(255,255,255,0.7)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 4px -2px rgba(80,180,140,0.4)"
-      }}>選択中
-
-      </div>
-      }
+      )}
     </div>);
-
 }
+
+const iconBtnSm = {
+  width: 22, height: 22, borderRadius: 7,
+  border: 'none', cursor: 'pointer',
+  background: 'rgba(255,255,255,0.8)',
+  color: 'var(--ink-mute)',
+  display: 'grid', placeItems: 'center',
+  fontSize: 13, fontWeight: 800, lineHeight: 1,
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 4px -2px rgba(31,39,72,0.12)'
+};
 
 function TemplatesCard({ templates, active, setActive, addTemplate, removeTemplate }) {
   const [adding, setAdding] = useState(false);
@@ -1526,6 +1862,11 @@ const appStyles = {
     maxWidth: 1500,
     margin: "0 auto",
     alignItems: "start"
+  },
+  statsWrap: {
+    padding: "8px 36px 0",
+    maxWidth: 1100,
+    margin: "0 auto"
   }
 };
 

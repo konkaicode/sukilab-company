@@ -43,15 +43,17 @@ export default function useTodos(date) {
   useEffect(() => { refresh(); }, [refresh]);
 
   const addTask = useCallback(async (text, opts = {}) => {
-    const { section = '通常', priority = '通常', genre, due } = opts;
+    const { section = '通常', priority = '通常', genre, due, date } = opts;
+    const writeDate = date || targetDate;
     try {
-      const res = await fetch(`${API_BASE}/todos/${targetDate}`, {
+      const res = await fetch(`${API_BASE}/todos/${writeDate}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, section, priority, genre, due })
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      await refresh();
+      // 今日のファイルに追加した場合のみ refresh
+      if (writeDate === targetDate) await refresh();
       return await res.json();
     } catch (err) {
       console.warn('[useTodos] addTask offline:', err.message);
@@ -75,6 +77,36 @@ export default function useTodos(date) {
     }
   }, [targetDate, refresh]);
 
+  const editTask = useCallback(async (id, patch) => {
+    try {
+      const res = await fetch(`${API_BASE}/todos/${targetDate}/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patch)
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await refresh();
+      return await res.json();
+    } catch (err) {
+      console.warn('[useTodos] editTask offline:', err.message);
+      return null;
+    }
+  }, [targetDate, refresh]);
+
+  const deleteTask = useCallback(async (id) => {
+    try {
+      const res = await fetch(`${API_BASE}/todos/${targetDate}/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await refresh();
+      return await res.json();
+    } catch (err) {
+      console.warn('[useTodos] deleteTask offline:', err.message);
+      return null;
+    }
+  }, [targetDate, refresh]);
+
   const logSession = useCallback(async ({ type, label, durationMin }) => {
     try {
       const res = await fetch(`${API_BASE}/sessions/${targetDate}`, {
@@ -93,5 +125,5 @@ export default function useTodos(date) {
     }
   }, [targetDate, refresh]);
 
-  return { data, status, error, refresh, addTask, toggleTask, logSession, date: targetDate };
+  return { data, status, error, refresh, addTask, toggleTask, editTask, deleteTask, logSession, date: targetDate };
 }

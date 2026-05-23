@@ -15,7 +15,8 @@ import { fileURLToPath } from 'node:url';
 import {
   SECTIONS, validDate, DEFAULT_TEMPLATE, applyTemplate,
   parseDoc, serializeDoc,
-  addTaskToDoc, toggleTaskInDoc, addSessionToDoc
+  addTaskToDoc, toggleTaskInDoc, removeTaskFromDoc, addSessionToDoc,
+  parsePomodoroEntries
 } from './lib/md-parser.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -126,14 +127,29 @@ app.post('/api/todos/:date', async (req, res) => {
 app.patch('/api/todos/:date/:id', async (req, res) => {
   const { date, id } = req.params;
   if (!validDate(date)) return res.status(400).json({ error: 'invalid date' });
-  const { checked, text } = req.body || {};
+  const { checked, text, section, priority, genre } = req.body || {};
 
   try {
     const { doc, filePath } = await readOrCreateDoc(date);
-    const updated = toggleTaskInDoc(doc, id, date, { checked, text });
+    const updated = toggleTaskInDoc(doc, id, date, { checked, text, section, priority, genre });
     if (!updated) return res.status(404).json({ error: 'task not found' });
     await writeLocalDoc(filePath, doc);
     res.json({ ok: true, task: updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/todos/:date/:id', async (req, res) => {
+  const { date, id } = req.params;
+  if (!validDate(date)) return res.status(400).json({ error: 'invalid date' });
+
+  try {
+    const { doc, filePath } = await readOrCreateDoc(date);
+    const removed = removeTaskFromDoc(doc, id);
+    if (!removed) return res.status(404).json({ error: 'task not found' });
+    await writeLocalDoc(filePath, doc);
+    res.json({ ok: true, task: removed });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -149,6 +165,39 @@ app.post('/api/sessions/:date', async (req, res) => {
     const note = addSessionToDoc(doc, { type, label, durationMin, time });
     await writeLocalDoc(filePath, doc);
     res.json({ ok: true, note });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/stats/range', async (req, res) => {
+  const { from, to } = req.query;
+  if (!validDate(from) || !validDate(to)) {
+    return res.status(400).json({ error: 'invalid from/to' });
+  }
+  try {
+    const fromDate = new Date(from + 'T00:00:00');
+    const toDate = new Date(to + 'T00:00:00');
+    if (fromDate > toDate) return res.status(400).json({ error: 'from must be <= to' });
+
+    const days = [];
+    for (let d = new Date(fromDate); d <= toDate; d.setDate(d.getDate() + 1)) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const dateStr = `${y}-${m}-${dd}`;
+      const filePath = path.join(TODOS_DIR, `${dateStr}.md`);
+      try {
+        const md = await fs.readFile(filePath, 'utf8');
+        const doc = parseDoc(md);
+        const { completed, focusMinutes, stopwatchMinutes } = parsePomodoroEntries(doc);
+        days.push({ date: dateStr, completed, focusMinutes, stopwatchMinutes });
+      } catch (err) {
+        if (err.code !== 'ENOENT') throw err;
+        days.push({ date: dateStr, completed: 0, focusMinutes: 0, stopwatchMinutes: 0 });
+      }
+    }
+    res.json({ from, to, days });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

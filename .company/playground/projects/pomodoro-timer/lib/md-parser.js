@@ -171,7 +171,7 @@ export function addTaskToDoc(doc, { text, section = '通常', priority = '通常
   return newTask;
 }
 
-export function toggleTaskInDoc(doc, id, date, { checked, text }) {
+export function toggleTaskInDoc(doc, id, date, { checked, text, section, priority, genre }) {
   let found = null;
   let foundSection = null;
   for (const sec of SECTIONS) {
@@ -185,23 +185,61 @@ export function toggleTaskInDoc(doc, id, date, { checked, text }) {
   if (!found) return null;
 
   if (typeof text === 'string') found.text = text;
+  if (typeof priority === 'string') found.priority = priority;
+  if (typeof genre === 'string') found.genre = genre;
+
   if (typeof checked === 'boolean') {
     found.checked = checked;
     if (checked && foundSection !== '完了') {
       doc.sections[foundSection] = doc.sections[foundSection].filter(t => t !== found);
       found.completedDate = date;
       doc.sections['完了'].push(found);
+      foundSection = '完了';
     } else if (!checked && foundSection === '完了') {
       doc.sections['完了'] = doc.sections['完了'].filter(t => t !== found);
       found.completedDate = null;
       doc.sections['通常'].push(found);
+      foundSection = '通常';
     }
   }
+
+  // section 移動（チェック以外で明示指定された場合）
+  if (typeof section === 'string' && SECTIONS.includes(section) && section !== foundSection) {
+    doc.sections[foundSection] = doc.sections[foundSection].filter(t => t !== found);
+    doc.sections[section].push(found);
+  }
+
   return found;
 }
 
+export function removeTaskFromDoc(doc, id) {
+  for (const sec of SECTIONS) {
+    const idx = doc.sections[sec].findIndex(t => t.id === id || t.text === id);
+    if (idx >= 0) {
+      const [removed] = doc.sections[sec].splice(idx, 1);
+      return removed;
+    }
+  }
+  return null;
+}
+
+export function moveTaskInDoc(doc, id, toSection) {
+  if (!SECTIONS.includes(toSection)) return null;
+  for (const sec of SECTIONS) {
+    const idx = doc.sections[sec].findIndex(t => t.id === id || t.text === id);
+    if (idx >= 0) {
+      const [item] = doc.sections[sec].splice(idx, 1);
+      doc.sections[toSection].push(item);
+      return item;
+    }
+  }
+  return null;
+}
+
 /**
- * メモ・振り返りセクション内の `[ポモドーロ] HH:MM 集中|休憩 NNmin[：ラベル]` を抽出。
+ * メモ・振り返りセクション内のセッション記録を抽出。
+ *  - `[ポモドーロ] HH:MM 集中|休憩 NNmin[：ラベル]`
+ *  - `[ストップウォッチ] HH:MM NNmin[：ラベル]`
  * クロスデバイス同期の単一情報源として使う（端末ローカルの localStorage に依存しない）。
  */
 export function parsePomodoroEntries(doc) {
@@ -209,38 +247,59 @@ export function parsePomodoroEntries(doc) {
   const sessions = [];
   let completed = 0;
   let focusMinutes = 0;
+  let stopwatchMinutes = 0;
+  let stopwatchLongest = 0;
   for (const note of notes) {
     if (note.kind !== 'note') continue;
-    // 例: "[ポモドーロ] 14:30 集中 25min：Design timer screen"
-    const m = note.text.match(/^\[ポモドーロ\]\s+(\d{1,2}:\d{2})\s+(集中|休憩)\s+(\d+)\s*min(?:\s*[：:]\s*(.*))?$/);
-    if (!m) continue;
-    const [, time, type, durStr, label] = m;
-    const dur = parseInt(durStr, 10);
-    const tone = type === '集中' ? 'mint' : (dur >= 10 ? 'lavender' : 'lemon');
-    if (type === '集中') {
-      completed++;
-      focusMinutes += dur;
+    // ポモドーロ: "[ポモドーロ] 14:30 集中 25min：Design timer screen"
+    const pm = note.text.match(/^\[ポモドーロ\]\s+(\d{1,2}:\d{2})\s+(集中|休憩)\s+(\d+)\s*min(?:\s*[：:]\s*(.*))?$/);
+    if (pm) {
+      const [, time, type, durStr, label] = pm;
+      const dur = parseInt(durStr, 10);
+      const tone = type === '集中' ? 'mint' : (dur >= 10 ? 'lavender' : 'lemon');
+      if (type === '集中') {
+        completed++;
+        focusMinutes += dur;
+      }
+      sessions.unshift({
+        time, type,
+        task: (label && label.trim()) || (type === '休憩' ? '休憩' : '集中セッション'),
+        dur: `${dur}分`, durMin: dur, tone
+      });
+      continue;
     }
-    // 新しい方が先頭になるよう unshift（ファイル上は古い順で並んでいる）
-    sessions.unshift({
-      time,
-      type,
-      task: (label && label.trim()) || (type === '休憩' ? 'ショート休憩' : '集中セッション'),
-      dur: `${dur}分`,
-      tone
-    });
+    // ストップウォッチ: "[ストップウォッチ] 14:30 32min：何でも"
+    const sw = note.text.match(/^\[ストップウォッチ\]\s+(\d{1,2}:\d{2})\s+(\d+)\s*min(?:\s*[：:]\s*(.*))?$/);
+    if (sw) {
+      const [, time, durStr, label] = sw;
+      const dur = parseInt(durStr, 10);
+      stopwatchMinutes += dur;
+      if (dur > stopwatchLongest) stopwatchLongest = dur;
+      sessions.unshift({
+        time, type: 'ストップ',
+        task: (label && label.trim()) || 'フリー計測',
+        dur: `${dur}分`, durMin: dur, tone: 'lavender'
+      });
+    }
   }
-  return { sessions, completed, focusMinutes };
+  return { sessions, completed, focusMinutes, stopwatchMinutes, stopwatchLongest };
 }
 
 export function addSessionToDoc(doc, { type = 'focus', label = '', durationMin = 0, time }) {
   const timeStr = time || new Date().toLocaleTimeString('ja-JP', {
     hour: '2-digit', minute: '2-digit', hour12: false
   });
-  const typeLabel = type === 'break' ? '休憩' : '集中';
-  const noteText = label
-    ? `[ポモドーロ] ${timeStr} ${typeLabel} ${durationMin}min：${label}`
-    : `[ポモドーロ] ${timeStr} ${typeLabel} ${durationMin}min`;
+  let noteText;
+  if (type === 'stopwatch') {
+    noteText = label
+      ? `[ストップウォッチ] ${timeStr} ${durationMin}min：${label}`
+      : `[ストップウォッチ] ${timeStr} ${durationMin}min`;
+  } else {
+    const typeLabel = type === 'break' ? '休憩' : '集中';
+    noteText = label
+      ? `[ポモドーロ] ${timeStr} ${typeLabel} ${durationMin}min：${label}`
+      : `[ポモドーロ] ${timeStr} ${typeLabel} ${durationMin}min`;
+  }
   doc.sections['メモ・振り返り'].push({ kind: 'note', text: noteText });
   return noteText;
 }
