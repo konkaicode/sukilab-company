@@ -221,12 +221,19 @@
 │   └── reports/
 ├── sales/
 │   ├── CLAUDE.md
+│   ├── profile/              ← 営業プロフィールDB（応募文生成の土台）
+│   │   ├── basics.md
+│   │   ├── works.md
+│   │   ├── strengths.md
+│   │   └── conditions.md
 │   ├── cases/
 │   │   ├── 001-haniwaman/
 │   │   ├── 002-daytora-comp-27/
 │   │   ├── 003-shu-san/
-│   │   └── 004-masataka/
-│   ├── templates/
+│   │   ├── 004-masataka/
+│   │   └── 005-allier/
+│   ├── templates/            ← 応募文の型（pitch-free / pitch-numbered）
+│   ├── sources.md            ← ②新規募集の自動探索（設計のみ）
 │   └── log.md
 └── playground/
     ├── CLAUDE.md
@@ -244,7 +251,7 @@
 | 就活部署 | job-hunting | 就職活動管理。企業研究・ES・面接メモ・選考トラッキング。 |
 | リサーチ部署 | research | 記事DB管理。Browser Use で読み込み・要約・星評価→知識ベースに蓄積。 |
 | ファイナンス部署 | finance-portfolio | 高配当株ポートフォリオ管理。SBI証券CSVを分析し、配当・セクター・購入候補レポートを生成。 |
-| 営業部署 | sales | Web制作営業管理。募集文+応募文をセットで蓄積し、将来的な自動化・テンプレート改善に活用。 |
+| 営業部署 | sales | Web制作営業管理。営業プロフィールDB（実績・強み・条件）を土台に、募集文から応募文を半自動生成。将来は新規募集の自動探索も。 |
 | プレイグラウンド | playground | 実験・プロトタイプ制作の自由な場所。LP・ツール試作・デザイン検証など。成功作は独立部署へ昇格。 |
 
 ---
